@@ -92,7 +92,7 @@ const config = {
             label: 'Документация',
           },
           {
-            href: 'https://github.com/voltbro/robohead',
+            href: 'https://github.com/voltbro/robohead2',
             label: 'GitHub',
             position: 'right',
           },
@@ -105,34 +105,25 @@ const config = {
             title: 'Docs',
             items: [
               {
-                label: 'Tutorial',
+                label: 'Инструкция',
                 to: '/',
               },
             ],
           },
           {
-            title: 'Community',
+            title: 'Сообщества',
             items: [
               {
-                label: 'Stack Overflow',
-                href: 'https://stackoverflow.com/questions/tagged/docusaurus',
+                label: 'Официальный сайт',
+                href: 'https://voltbro.ru/',
               },
               {
-                label: 'Discord',
-                href: 'https://discordapp.com/invite/docusaurus',
+                label: 'Telegram',
+                href: 'https://t.me/+aj3N9SvJ_qw3Y2Vi',
               },
               {
-                label: 'X',
-                href: 'https://x.com/docusaurus',
-              },
-            ],
-          },
-          {
-            title: 'More',
-            items: [
-              {
-                label: 'GitHub',
-                href: 'https://github.com/facebook/docusaurus',
+                label: 'Вконтакте',
+                href: 'https://vk.com/voltbro',
               },
             ],
           },

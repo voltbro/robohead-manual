@@ -26,7 +26,7 @@ title: Написание своего действия для robohead_controll
 Формальная грамматика определяет множество команд, которые может распознавать речевой модуль. Откройте файл:
 
 ```bash
-nano ~robohead_ws/src/robohead/robohead_controller/config/voice_recognizer_pocketsphinx/gram.txt
+nano ~/robohead_ws/src/robohead/robohead_controller/config/voice_recognizer_pocketsphinx/gram.txt
 ```
 
 В нём вы увидите примерно такой набор правил:
@@ -83,7 +83,7 @@ public <commands> = <command> ;
 Откройте файл, где будут перечислены все слова, из которых будет строиться фонетический словарь:
 
 ```bash
-nano ~robohead_ws/src/robohead/robohead_controller/config/voice_recognizer_pocketsphinx/dictionary.txt
+nano ~/robohead_ws/src/robohead/robohead_controller/config/voice_recognizer_pocketsphinx/dictionary.txt
 ```
 
 Добавьте слово `улыбнись` в конец списка (или в алфавитном порядке для удобства):
@@ -231,7 +231,7 @@ def run(robohead_controller: RoboheadController, cmds: str):
 Файл находится по пути:
 
 ```
-~robohead_ws/src/robohead/robohead_controller/config/robohead_controller.yaml
+~/robohead_ws/src/robohead/robohead_controller/config/robohead_controller.yaml
 ```
 
 Откройте его в любом удобном редакторе.
