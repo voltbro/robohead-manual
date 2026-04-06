@@ -7,6 +7,8 @@ sidebar_position: 1
 
 import robohead from './10-introduction/attachments/robohead.png';
 
+## Ссылка на настоящую инструкцию: [https://docs.voltbro.ru/robohead-manual/](https://docs.voltbro.ru/robohead-manual/)
+
 **Роботизированная голова Bbrain 2.0** разработана для образовательных и исследовательских задач в области робототехники, искусственного интеллекта и взаимодействия человек–машина. Устройство служит платформой для изучения и разработки алгоритмов компьютерного зрения, управления приводами, распознавания и синтеза речи, генерации визуального и звукового контента.
 
 <img src={robohead} alt="robohead" style={{width: 600}} />
@@ -19,13 +21,18 @@ import robohead from './10-introduction/attachments/robohead.png';
 
 Настоящая инструкция содержит описание устройства, основы его работы, порядок взаимодействия с аппаратной частью, а также описание API и программных интерфейсов, доступных разработчику.
 
-Проект Bbrain разработан и поддерживается командой **«Братья Вольт»**:
+Проект Bbrain разработан и поддерживается компанией **"Братья Вольт"**:
 
 Для начинающих пользователей ROS мы рекомендуем ознакомиться с нашим вводным курсом: [Введение в ROS](https://voltbro.gitbook.io/new_bazovyi-kurs-po-ros)
 
-🌐 **Сайт проекта**: [https://www.voltbro.ru/](https://www.voltbro.ru/) 
 
-▶️ **Телеграм-канал проекта "Братья Вольт"**: [https://t.me/Voltbro_official](https://t.me/Voltbro_official) 
+### Контакты компании "Братья Вольт"
 
-👥 **Группа в ВКонтакте**: [https://vk.com/voltbro](https://vk.com/voltbro)
+🌐 **Сайт**: [https://www.voltbro.ru/](https://www.voltbro.ru/) 
+
+▶️ **Телеграм-канал**: [https://t.me/Voltbro_official](https://t.me/Voltbro_official) 
+
+▶️ **Канал в MAX**: [Ссылка](https://max.ru/join/6PHxsLpFKd7gelwF6OtDsXEqq0oEmdRNPy3OHSZZdEg)
+
+👥 **Группа во ВКонтакте**: [https://vk.com/voltbro](https://vk.com/voltbro)
 
