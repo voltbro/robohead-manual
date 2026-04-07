@@ -1,9 +1,13 @@
 ---
 id: 41-robohead-controller
-title: robohead_controller
+slug: robohead_controller
+title: "Пакет robohead_controller"
+sidebar_label: "robohead_controller"
+description: "robohead_controller"
+draft: true
 ---
 
-# Пакет **robohead\_controller**
+# Пакет `robohead_controller`
 
 **Назначение:** основной ROS-пакет для управления всеми системами Робоголовы на основе распознанных аудиокоманд.
 
@@ -99,4 +103,4 @@ robohead_controller/
 
 Настройка соответствия "голосовая команда - action-скрипт" задается в файле `config/robohead_controller.yaml`.
 
-Подробнее про настройку параметров написано здесь [->](../30-setting-up-device/30-changing-device-settings.md)
+Подробнее про настройку параметров написано здесь [->](../../30-device-configuration/30-device-setting/30-changing-device-settings.md)

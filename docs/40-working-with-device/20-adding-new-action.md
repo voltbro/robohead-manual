@@ -1,6 +1,10 @@
 ---
 id: 20-adding-new-action
-title: Написание своего действия для robohead_controller
+slug: adding-new-action
+title: "Написание своего действия для robohead_controller"
+sidebar_label: "Написание своего действия для robohead_controller"
+sidebar_position: 2
+description: "Написание своего действия для robohead_controller"
 ---
 
 # Написание своего действия для robohead_controller

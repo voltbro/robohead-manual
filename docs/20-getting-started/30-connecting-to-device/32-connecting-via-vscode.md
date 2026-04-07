@@ -1,6 +1,10 @@
 ---
 id: 32-connecting-via-vscode
-title: Подключение через VSCode 
+slug: connecting-via-vscode
+title: "Подключение через VSCode"
+sidebar_label: "Подключение через VSCode"
+sidebar_position: 3
+description: "Подключение через VSCode"
 ---
 
 Процесс настройки VSCode одинаков на всех операционных системах.
@@ -9,17 +13,17 @@ title: Подключение через VSCode
 2. В левом нижнем углу окна нажмите **Open a Remote Window**  
    _При первом использовании потребуется установка расширения **Remote - SSH**_
 
-![](attachements/VSCode-1.png)
+![](../attachements/VSCode-1.png)
 
 3. В появившемся меню выберите **Connect to Host → Add New SSH Host**
 
-![](attachements/VSCode-2.png)
+![](../attachements/VSCode-2.png)
 
-![](attachements/VSCode-3.png)
+![](../attachements/VSCode-3.png)
 
 4. В строке ввода введите команду `ssh pi@< IP-адрес Робоголовы >` и затем нажмите клавишу *Enter*
 
-![](attachements/VSCode-4.png)
+![](../attachements/VSCode-4.png)
 
 5. Выберите SSH-config файл для сохранения хоста по своему усмотрению
 6. Введите пароль `brobro`
@@ -30,7 +34,7 @@ title: Подключение через VSCode
 
 7. Если все сделано правильно, то справа снизу вы увидете окно:
 
-![](attachements/VSCode-5.png)
+![](../attachements/VSCode-5.png)
 
 8. Можете нажать кнопку *Connect*, чтобы подключиться к компьютеру Робоголовы. Возможно, система снова потребует ввод пароля
 9. При правильном вводе пароля, в правой нижней части экрана вы увидите сообщение о загрузке и установке VSCode Server на компьютере Робоголовы. Как только загрузка закончится, вы сможете начать работать с удаленным компьютером

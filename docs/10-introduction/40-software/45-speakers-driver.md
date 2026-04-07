@@ -1,6 +1,10 @@
 ---
 id: 45-speakers-driver
-title: speakers_driver
+slug: speakers_driver
+title: "Пакет speakers_driver"
+sidebar_label: "speakers_driver"
+description: "speakers_driver"
+draft: true
 ---
 
 # Пакет `speakers_driver`
@@ -100,7 +104,7 @@ speakers_driver/
      ```
    * **Возвращаемое значение:** текущее значение громкости (0–100 %)
 
-*Подробнее о настройке громкости динамиков:* [->](../30-setting-up-device/33-adjusting-volume.md)
+*Подробнее о настройке громкости динамиков:* [->](../../30-device-configuration/30-device-setting/33-adjusting-volume.md)
 
 ## Режим отладки
 

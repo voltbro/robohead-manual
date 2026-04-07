@@ -1,0 +1,10 @@
+{
+  "label": "Начало работы",
+  "position": 3,
+  "collapsed": true,
+  "link": {
+    "slug": "getting-started",
+    "type": "generated-index",
+    "description": "Введение в роботизированное устройство BBrain 2.0"
+  }
+}

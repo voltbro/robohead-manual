@@ -1,6 +1,10 @@
 ---
 id: 47-voice-recognizer-pocketsphinx
-title: voice_recognizer_pocketsphinx
+slug: voice_recognizer_pocketsphinx
+title: "Пакет voice_recognizer_pocketsphinx"
+sidebar_label: "voice_recognizer_pocketsphinx"
+description: "voice_recognizer_pocketsphinx"
+draft: true
 ---
 
 # Пакет `voice_recognizer_pocketsphinx`
@@ -56,7 +60,7 @@ voice_recognizer_pocketsphinx/
    * Отслеживает ключевые слова из файла `config/kwslist.txt`.
    * Публикует распознаный текст.
 
-    *Подробнее про смену ключевой фразы:* [->](../30-setting-up-device/50-changing-keywords.md)
+    *Подробнее про смену ключевой фразы:* [->](../../30-device-configuration/50-changing-keywords.md)
 
 2. **Распознавание команд (CMDS — Command Spotting)**
 
@@ -67,7 +71,7 @@ voice_recognizer_pocketsphinx/
 3. **Динамическая настройка словаря и грамматики**
 
    * Поддерживает возможность обновления файла `dictionary.txt` и `dictionary.dict.accent` для добавления новых слов и команд.
-   * **Инструкция по генерации:** [Настройка собственных команд и ключевых слов](../40-working-with-device/20-adding-new-action.md)
+   * **Инструкция по генерации:** [Настройка собственных команд и ключевых слов](../../40-working-with-device/20-adding-new-action.md)
 
 4. **Управление состоянием работы**
 
@@ -162,4 +166,4 @@ rostopic echo /voice_recognizer_pocketsphinx/cmds_recognizer/commands
 [https://dencode.com/ru/string/unicode-escape](https://dencode.com/ru/string/unicode-escape)
 
 
-![Пример перевода unicode escape-последовательностей в читаемый формат](attachments/decoder.png)
+![Пример перевода unicode escape-последовательностей в читаемый формат](../attachments/decoder.png)

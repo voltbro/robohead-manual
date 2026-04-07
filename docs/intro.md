@@ -1,17 +1,18 @@
 ---
-slug: /
 id: intro
+slug: /
 title: Общая информация
+sidebar_label: Общая информация
 sidebar_position: 1
 ---
 
-import robohead from './10-introduction/attachments/robohead.png';
-
-## Ссылка на настоящую инструкцию: [https://docs.voltbro.ru/robohead-manual/](https://docs.voltbro.ru/robohead-manual/)
 
 **Роботизированная голова Bbrain 2.0** разработана для образовательных и исследовательских задач в области робототехники, искусственного интеллекта и взаимодействия человек–машина. Устройство служит платформой для изучения и разработки алгоритмов компьютерного зрения, управления приводами, распознавания и синтеза речи, генерации визуального и звукового контента.
 
-<img src={robohead} alt="robohead" style={{width: 600}} />
+<figure style={{textAlign: 'center'}}>
+   <img src={require("./10-introduction/attachments/robohead.png").default} alt="qj" width="800" />
+</figure>
+
 
 Устройство построено на базе одноплатного компьютера Raspberry Pi 5 и работает под управлением операционной системы Ubuntu Server 24.04.3 LTS. Оно полностью совместимо с **Robot Operating System 2 (ROS2)** и имеет **открытый исходный код**, что делает Робоголову Bbrain гибкой и расширяемой платформой для пользовательских проектов.
 
@@ -21,18 +22,16 @@ import robohead from './10-introduction/attachments/robohead.png';
 
 Настоящая инструкция содержит описание устройства, основы его работы, порядок взаимодействия с аппаратной частью, а также описание API и программных интерфейсов, доступных разработчику.
 
-Проект Bbrain разработан и поддерживается компанией **"Братья Вольт"**:
 
-Для начинающих пользователей ROS мы рекомендуем ознакомиться с нашим вводным курсом: [Введение в ROS](https://voltbro.gitbook.io/new_bazovyi-kurs-po-ros)
+Роботизированное устройство Bbrain разработано и поддерживается проектом **"Братья Вольт"**
 
-
-### Контакты компании "Братья Вольт"
+### Контакты проекта "Братья Вольт"
 
 🌐 **Сайт**: [https://www.voltbro.ru/](https://www.voltbro.ru/) 
 
 ▶️ **Телеграм-канал**: [https://t.me/Voltbro_official](https://t.me/Voltbro_official) 
 
-▶️ **Канал в MAX**: [Ссылка](https://max.ru/join/6PHxsLpFKd7gelwF6OtDsXEqq0oEmdRNPy3OHSZZdEg)
+▶️ **Канал в MAX**: [https://max.ru/voltbro](https://max.ru/join/6PHxsLpFKd7gelwF6OtDsXEqq0oEmdRNPy3OHSZZdEg)
 
 👥 **Группа во ВКонтакте**: [https://vk.com/voltbro](https://vk.com/voltbro)
 

@@ -1,6 +1,10 @@
 ---
 id: 31-changing-network-name
-title: Изменение сетевого имени
+slug: changing-network-name
+title: "Изменение сетевого имени"
+sidebar_label: "Изменение сетевого имени"
+sidebar_position: 2
+description: "Изменение сетевого имени"
 ---
 
 По умолчанию имя устройства задаётся как `roboheadXXX`, где `XXX` — номер на наклейке. 
@@ -49,13 +53,13 @@ title: Изменение сетевого имени
    sudo reboot
    ```
 
-    ![Изменение сетевого имени устройства по SSH](attachments/change-network-name-SSH.gif)
+    ![Изменение сетевого имени устройства по SSH](../attachments/change-network-name-SSH.gif)
 ---
 
 ## 2. С помощью microSD карты
 
 1. Извлеките microSD карту из Робоголовы и подключите её к компьютеру под **Ubuntu**.
-2. Смонтируйте раздел `system-boot` (он автоматически монтируется при подключении). Подробнее про разделы можно почитать [здесь](10-setting-up-Wi-Fi-connection.md#настройка-подключения-к-новой-wi-fi-через-sd-карту-new-wi-fi-sd)
+2. Смонтируйте раздел `system-boot` (он автоматически монтируется при подключении). Подробнее про разделы можно почитать [здесь](../10-setting-up-Wi-Fi-connection.md#настройка-подключения-к-новой-wi-fi-через-sd-карту-new-wi-fi-sd)
 3. Отредактируйте файл `user-data` на разделе `system-boot`:
 
    ```bash

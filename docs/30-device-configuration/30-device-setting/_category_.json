@@ -1,0 +1,9 @@
+{
+  "label": "Изменение стандартных настроек устройства",
+  "position": 3,
+  "link": {
+    "slug": "device-setting",
+    "type": "generated-index",
+    "description": "Введение в роботизированное устройство BBrain 2.0"
+  }
+}

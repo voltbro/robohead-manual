@@ -1,0 +1,9 @@
+{
+  "label": "Программное обеспечение",
+  "position": 3,
+  "link": {
+    "slug": "connecting-to-device",
+    "type": "generated-index",
+    "description": "Введение в роботизированное устройство BBrain 2.0"
+  }
+}

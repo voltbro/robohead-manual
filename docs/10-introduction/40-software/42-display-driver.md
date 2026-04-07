@@ -1,6 +1,10 @@
 ---
 id: 42-display-driver
-title: display_driver
+slug: display_driver
+title: "Пакет display_driver"
+sidebar_label: "display_driver"
+description: "display_driver"
+draft: true
 ---
 
 # Пакет `display_driver`

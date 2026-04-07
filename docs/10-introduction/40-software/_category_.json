@@ -1,0 +1,9 @@
+{
+  "label": "Программное обеспечение",
+  "position": 4,
+  "link": {
+    "slug": "software",
+    "type": "generated-index",
+    "description": "Введение в роботизированное устройство BBrain 2.0"
+  }
+}

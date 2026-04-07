@@ -1,17 +1,21 @@
 ---
 id: 33-connecting-via-sftp
-title: Подключение по SFTP
+slug: connecting-via-sftp
+title: "Подключение по SFTP"
+sidebar_label: "Подключение по SFTP"
+sidebar_position: 4
+description: "Подключение по SFTP"
 ---
 
 # Ubuntu
 
 1. Откройте файловый менеджер **Nautilus**. Для этого нажмите кнопку Show Apps в левом нижнем углу и в строке поиска введите *Files*
 
-![](attachements/SFTP-1.png)
+![](../attachements/SFTP-1.png)
 
 2. В открывшемся окне в меню слева нажмите на кнопку **Other Locations**
 
-![](attachements/SFTP-2.png)
+![](../attachements/SFTP-2.png)
 
 3. В поле **Enter server address...** введите:
    ```
@@ -19,7 +23,7 @@ title: Подключение по SFTP
    ```
    и нажмите **Connect**
 
-![](attachements/SFTP-3.png)
+![](../attachements/SFTP-3.png)
 
 4. При первом подключении появится окно **Authentication Required**:
    - Введите **имя пользователя** и **пароль**.

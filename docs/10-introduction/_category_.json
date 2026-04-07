@@ -1,0 +1,10 @@
+{
+  "label": "Введение",
+  "position": 2,
+  "collapsed": false,
+  "link": {
+    "slug": "introduction",
+    "type": "generated-index",
+    "description": "Введение в роботизированное устройство BBrain 2.0"
+  }
+}

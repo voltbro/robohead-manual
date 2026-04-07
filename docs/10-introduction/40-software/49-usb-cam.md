@@ -1,6 +1,10 @@
 ---
 id: 49-usb-cam
-title: usb_cam
+slug: usb_cam
+title: "usb_cam"
+sidebar_label: "usb_cam"
+description: "usb_cam"
+draft: true
 ---
 
 # Пакет `usb_cam`

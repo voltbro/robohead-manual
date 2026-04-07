@@ -1,6 +1,10 @@
 ---
 id: 43-neck-driver
-title: neck_driver
+slug: neck_driver
+title: "Пакет neck_driver"
+sidebar_label: "neck_driver"
+description: "neck_driver"
+draft: true
 ---
 
 # Пакет `neck_driver` 
@@ -74,7 +78,7 @@ is_blocking: 1"
 • Если указать `duration: 0`, перемещение будет максимально быстрым — использовать с осторожностью.
 :::
 
-*Подробнее о настройке сервоприводов:* [->](../30-setting-up-device/34-configuring-servos.md)
+*Подробнее о настройке сервоприводов:* [->](../../30-device-configuration/30-device-setting/34-configuring-servos.md)
 
 ## Режим отладки
 

@@ -1,6 +1,10 @@
 ---
 id: 35-microphone-backlight-control
-title: Управление подсветкой микрофонного модуля
+slug: microphone-backlight-control
+title: "Управление подсветкой микрофонного модуля"
+sidebar_label: "Управление подсветкой микрофонного модуля"
+sidebar_position: 6
+description: "Управление подсветкой микрофонного модуля"
 ---
 
 # Управление подсветкой микрофонного модуля

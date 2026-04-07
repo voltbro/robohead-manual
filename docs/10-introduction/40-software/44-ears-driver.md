@@ -1,6 +1,10 @@
 ---
 id: 44-ears-driver
-title: ears_driver
+slug: ears_driver
+title: "Пакет ears_driver"
+sidebar_label: "ears_driver"
+description: "ears_driver"
+draft: true
 ---
 
 # Пакет `ears_driver` 
@@ -74,7 +78,7 @@ right_ear_angle: 30"
     - *Правое ухо*: против часовой стрелки
 :::
 
-*Подробнее о настройке сервоприводов:* [->](../30-setting-up-device/34-configuring-servos.md)
+*Подробнее о настройке сервоприводов:* [->](../../30-device-configuration/30-device-setting/34-configuring-servos.md)
 
 ## Режим отладки
 

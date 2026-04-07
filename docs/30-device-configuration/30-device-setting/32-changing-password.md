@@ -1,6 +1,10 @@
 ---
 id: 32-changing-password
-title: Изменение пароля
+slug: changing-password
+title: "Изменение пароля"
+sidebar_label: "Изменение пароля"
+sidebar_position: 3
+description: "Изменение пароля"
 ---
 
 Напомним стандартные учетные данные:

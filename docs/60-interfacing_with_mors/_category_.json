@@ -1,0 +1,10 @@
+{
+  "label": "Взаимодействие с роботом МОРС",
+  "position": 7,
+  "collapsed": true,
+  "link": {
+    "slug": "interfacing_with_mors",
+    "type": "generated-index",
+    "description": "Введение в роботизированное устройство BBrain 2.0"
+  }
+}

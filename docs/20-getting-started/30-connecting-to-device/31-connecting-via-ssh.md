@@ -1,6 +1,10 @@
 ---
 id: 31-connecting-via-ssh
-title: Подключение по SSH
+slug: 31-connecting-via-ssh
+title: "Подключение по SSH"
+sidebar_label: "Подключение по SSH"
+sidebar_position: 2
+description: "Подключение по SSH"
 ---
 
 # Подключение по сетевому имени в локальной сети
@@ -14,7 +18,7 @@ title: Подключение по SSH
 :::
 ---
 
-Для подключения вам необходимо [Настроить сеть](../30-setting-up-device/10-setting-up-Wi-Fi-connection.md)
+Для подключения вам необходимо [Настроить сеть](../../30-device-configuration/10-setting-up-Wi-Fi-connection.md)
 
 Каждый робот имеет уникальное имя вида `roboheadXXX.local`, где `XXX` — это номер устройства. При правильной настройке сети и вашего роутера, вы сможете сразу подключиться к Raspberry по его сетевому имени в локальной сети:
 
@@ -41,15 +45,15 @@ ssh pi@roboheadXXX.local
 
 - Заходим на страницу авторизации и вводим логин и пароль с доступом к веб-интерфейсу
 
-![](attachements/keenetic-1.png)
+![](../attachements/keenetic-1.png)
 
 - Переходим в раздел **Мои сети и Wi-Fi -> Список клиентов**
 
-![](attachements/keenetic-2.png)
+![](../attachements/keenetic-2.png)
 
 - Смотрим список устройств. Находим Робоголову и её IP-адрес
 
-![](attachements/keenetic-3.png)
+![](../attachements/keenetic-3.png)
 
 2. **С помощью программы Angry IP Scanner**
 
@@ -67,7 +71,7 @@ ssh pi@roboheadXXX.local
    ```
    3. После выполнения bash-скрипта появится ярлык приложения **Angry IP Scanner**
 
-   ![](attachements/angryipscanner-bash.png)
+   ![](../attachements/angryipscanner-bash.png)
 
    #### 2. Установка через DEB-пакет (Ubuntu)
    1. Скачайте **x86 64-bit DEB Package for Ubuntu** с официального сайта: 
@@ -76,29 +80,29 @@ ssh pi@roboheadXXX.local
       
    2. Запустите скаченный файл и установите утилиту:
 
-![](attachements/angryipscanner-install1.png)
+![](../attachements/angryipscanner-install1.png)
 
    3. После установки ярлык утилиты должен появится в списке приложений
 
-![](attachements/angryipscanner-install2.png)
+![](../attachements/angryipscanner-install2.png)
 
 ### Определение с помощью Angry IP Scanner
 
    - Запустите **Angry IP Scanner**
 
-![](attachements/angryipscanner-1.png)
+![](../attachements/angryipscanner-1.png)
 
    - Выберите необходимый диапазон сканируемых IP-адресов и запустите сканирование
 
-![](attachements/angryipscanner-2.png)
+![](../attachements/angryipscanner-2.png)
 
    - После сканирования вы увидете статистику. Чтобы показывать только активные хосты, выберите в меню **Инструменты → Предпочтения ...→ Отобразить → Только активные хосты (отвечающие на пинг)**
 
-![](attachements/angryipscanner-3.png)
+![](../attachements/angryipscanner-3.png)
 
    - Повторите сканирование. В случае, если компьютер и Робоголова подключены к одной Wi-FI сети, то вы должны увидеть IP-адрес Робоголовы:
 
-![](attachements/angryipscanner-4.png)
+![](../attachements/angryipscanner-4.png)
 
 ---
 
@@ -134,7 +138,7 @@ ssh pi@192.168.43.87
 
 1. Нажмите **Win+R**, введите `cmd` и нажмите **OK**. 
 
-![](attachements/cmd.png)
+![](../attachements/cmd.png)
 
 2. В открывшемся терминале выполните:
 
@@ -142,12 +146,12 @@ ssh pi@192.168.43.87
 ssh pi@192.168.43.87
 ```
 
-![](attachements/connectedSSH-1.png)
+![](../attachements/connectedSSH-1.png)
 
 3. Введите пароль `brobro`.  
 4. После подключения появится приглашение `pi@roboheadXXX:~$`.
 
-![](attachements/connectedSSH-2.png)
+![](../attachements/connectedSSH-2.png)
 
 ---
 

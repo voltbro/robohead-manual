@@ -1,6 +1,10 @@
 ---
 id: 48-sensor-driver
-title: sensor_driver
+slug: sensor_driver
+title: "Пакет sensor_driver"
+sidebar_label: "sensor_driver"
+description: "sensor_driver"
+draft: true
 ---
 
 # Пакет `sensor_driver`

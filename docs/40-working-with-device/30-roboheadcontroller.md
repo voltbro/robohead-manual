@@ -1,6 +1,10 @@
 ---
 id: 30-roboheadcontroller
-title: Описание объектов класса RoboheadController
+slug: roboheadcontroller
+title: "Описание объектов класса RoboheadController"
+sidebar_label: "Описание объектов класса RoboheadController"
+sidebar_position: 3
+description: "Описание объектов класса RoboheadController"
 ---
 
 # Описание объектов класса RoboheadController

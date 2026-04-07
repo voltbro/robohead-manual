@@ -1,6 +1,10 @@
 ---
 id: 10-setting-up-Wi-Fi-connection
-title: Настройка подключение к Wi-Fi
+slug: setting-up-Wi-Fi-connection
+title: "Настройка подключение к Wi-Fi"
+sidebar_label: "Настройка подключение к Wi-Fi"
+sidebar_position: 1
+description: "Настройка подключение к Wi-Fi"
 ---
 
 При включении устройства у вас есть два способа подключения к Робоголове: **Wi-Fi сеть** или **проводное соединение**.

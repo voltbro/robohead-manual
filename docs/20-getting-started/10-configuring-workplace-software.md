@@ -1,6 +1,10 @@
 ---
 id: 10-configuring-workplace-software
-title: Настройка ПО рабочего места
+slug: workplace-software
+title: "Настройка ПО рабочего места"
+sidebar_label: "Настройка ПО рабочего места"
+sidebar_position: 1
+description: "Настройка ПО рабочего места"
 ---
 
 # Настройка ПО рабочего места

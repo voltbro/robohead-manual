@@ -1,0 +1,10 @@
+{
+  "label": "Взаимодействие с роботом TurtleBro2",
+  "position": 6,
+  "collapsed": true,
+  "link": {
+    "slug": "interfacing_with_turtlebro",
+    "type": "generated-index",
+    "description": "Введение в роботизированное устройство BBrain 2.0"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "label": "Работа с устройством",
+  "position": 5,
+  "collapsed": true,
+  "link": {
+    "slug": "working-with-device",
+    "type": "generated-index",
+    "description": "Введение в роботизированное устройство BBrain 2.0"
+  }
+}

@@ -1,6 +1,10 @@
 ---
 id: 50-useful-links
-title: Полезные ссылки
+slug: useful-links
+title: "Полезные ссылки"
+sidebar_label: "Полезные ссылки"
+sidebar_position: 5
+description: "Полезные ссылки"
 ---
 
 

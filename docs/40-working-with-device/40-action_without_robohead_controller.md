@@ -1,7 +1,12 @@
 ---
 id: 40-action_without_robohead_controller
-title: Создание своих сценариев взаимодействия без использования robohead_controller
+slug: action_without_robohead_controller
+title: "Создание своих сценариев взаимодействия без использования robohead_controller"
+sidebar_label: "Создание своих сценариев взаимодействия без использования robohead_controller"
+sidebar_position: 4
+description: "Создание своих сценариев взаимодействия без использования robohead_controller"
 ---
+
 
 # Создание собственного сценария без использования `robohead_controller`
 

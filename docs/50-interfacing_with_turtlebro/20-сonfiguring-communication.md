@@ -1,6 +1,10 @@
 ---
 id: 20-сonfiguring-communication
-title: Настройка коммуникации между устройствами
+slug: сonfiguring-communication
+title: "Настройка коммуникации между устройствами"
+sidebar_label: "Настройка коммуникации между устройствами"
+sidebar_position: 2
+description: "Настройка коммуникации между устройствамиr"
 ---
 
 # Настройка коммуникации между устройствами
@@ -17,7 +21,7 @@ title: Настройка коммуникации между устройств
 
 ## 2. Узнайте IP-адреса устройств
 
-Вы можете воспользоваться разделом [Определение IP-адреса Робоголовы](../20-getting-started/31-connecting-via-ssh.md#определение-ip-адреса-робоголовы) или инструкцией к роботу TurtleBro: [Как определить IP-адрес робота](https://ros1.turtlebro.ru/pervoe-vklyuchenie-i-nastroika-robota/ssh.html).
+Вы можете воспользоваться разделом [Определение IP-адреса Робоголовы](../20-getting-started/30-connecting-to-device/31-connecting-via-ssh.md#определение-ip-адреса-робоголовы) или инструкцией к роботу TurtleBro: [Как определить IP-адрес робота](https://ros1.turtlebro.ru/pervoe-vklyuchenie-i-nastroika-robota/ssh.html).
 
 Для дальнейшей инструкции примем, что следующие IP-адреса устройств:
 

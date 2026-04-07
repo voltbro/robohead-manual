@@ -1,6 +1,10 @@
 ---
 id: 46-respeaker-driver
-title: respeaker_driver
+slug: respeaker_driver
+title: "Пакет respeaker_driver"
+sidebar_label: "respeaker_driver"
+description: "respeaker_driver"
+draft: true
 ---
 
 # Пакет `respeaker_driver`
@@ -101,11 +105,11 @@ respeaker_driver/
   **Тип:** `audio_common_msgs/AudioData`
   Сервис для переключения режимов работы светодиодного кольца.
 
-![Направление поступления звука по градусами](attachments/Head_v2_respeaker.jpg)
+![Направление поступления звука по градусами](../attachments/Head_v2_respeaker.jpg)
 
 2. **Управление светодиодным кольцом (Pixel Ring)**
 
-   Подробнее об управлении подсветкой микрофонного модуля: [->](../30-setting-up-device/35-microphone-backlight-control.md)
+   Подробнее об управлении подсветкой микрофонного модуля: [->](../../30-device-configuration/30-device-setting/35-microphone-backlight-control.md)
 
 ## Режим отладки
 
