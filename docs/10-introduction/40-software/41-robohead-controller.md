@@ -68,7 +68,14 @@ robohead_controller
 │   │   ├── std_right_ear
 │   │   ├── std_show_voltage
 │   │   ├── std_startup
-│   │   └── std_wait
+│   │   ├── std_wait
+│   │   ├── std_volume_down             # Быстрое действие на команду "Тише"
+│   │   │   ├── action.py
+│   │   │   └── set_vol.mp3
+│   │   └── std_volume_up               # Быстрое действие на команду "Громче"
+│   │       ├── action.py
+│   │       ├── max_vol.mp3
+│   │       └── set_vol.mp3
 │   ├── controller.py                   # Файл с главным классом RoboheadController
 │   ├── core
 │   │   ├── action_manager.py           # Управление запуском действий
@@ -84,14 +91,6 @@ robohead_controller
 │   │   ├── speech_recognizer_asr.py
 │   │   ├── speech_recognizer_kws.py
 │   │   └── usb_cam.py
-│   ├── fast_actions                    # Быстрые действия
-│   │   ├── std_volume_down             # Быстрое действие на команду "Тише"
-│   │   │   ├── action.py
-│   │   │   └── set_vol.mp3
-│   │   └── std_volume_up
-│   │       ├── action.py
-│   │       ├── max_vol.mp3
-│   │       └── set_vol.mp3
 │   ├── __init__.py
 │   ├── main.py                         # Точка входа
 ├── setup.cfg
@@ -107,7 +106,7 @@ robohead_controller
 ## Автоматический запуск
 
 * Пакет `robohead_controller` стартует автоматически при загрузке устройства.
-> Для отключения автозапуска используйте: sudo systemctl stop robohead.service
+> Для отключения автозапуска используйте: `sudo systemctl stop robohead.service`
 * Запуск этого пакета инициирует старты всех зависимых ROS-пакетов (см. `launch/robohead_controller_py.launch` и `launch/dependencies.launch`).
 
 ---
@@ -118,105 +117,48 @@ robohead_controller
 
 | Скрипт             | Описание команды                     |
 | ------------------ | ------------------------------------ |
+| `std_startup`      | Действие при запуске                 |
 | `std_wait`         | Ожидание ключевой фразы              |
 | `std_attention`    | «Слушай, Робот!»                     |
+| `std_ball_tracker` | «Следи за шариком»                   |
 | `std_ears`         | «Покажи уши»                         |
 | `std_left_ear`     | «Покажи левое ухо»                   |
 | `std_right_ear`    | «Покажи правое ухо»                  |
 | `std_greeting`     | «Поздоровайся»                       |
 | `std_make_photo`   | «Сделай фото»                        |
-| `std_ball_tracker` | «Следи за шариком»                   |
+| `std_echo`         | "Повтори за мной"                    |
+| `std_llm`          | "Ответь на вопрос"                   |
 | `std_low_bat`      | Низкий заряд — блокирование других скриптов |
 
-> *Расположение:* `scripts/robohead_controller_actions/<script_name>/`
+> *Расположение:* `robohead_controller/robohead_controller/actions/<script_name>/`
 
-Каждый скрипт содержит код `action.py` и мультимедиа (картинки, аудио, видео). Для замены медиа без изменения кода просто замените файл в папке скрипта, сохранив имя и расширение (для картинок и видео обязательно используйте разрешение 1080x1080 пикселей).
+Каждый скрипт содержит код `action.py` и мультимедиа (картинки, аудио, видео). Для замены медиа без изменения кода просто замените файл в папке скрипта, сохранив имя и расширение.
 
 ---
 
 ## Конфигурация параметров устройства
 
-Основные параметры для подключенных аппаратных компонентов находятся в папке `config/`:
+Основные параметры для подключенных аппаратных компонентов находятся в папке `robohead_controller/config/`:
 
-* `display_driver.yaml` — настройка параметров дисплея
+* `media_driver.yaml` — настройка параметров дисплея
 * `ears_driver.yaml` — настройка параметров ушных сервоприводов
 * `neck_driver.yaml` — настройка параметров шейных сервоприводов
 * `respeaker_driver.yaml` — настройка параметров микрофонного массива
-* `sensor_driver.yaml` — настройка параметров топика /bat
-* `speakers_driver.yaml` — настройка параметров динамиков
+* `sensor_driver.yaml` — настройка параметров датчика АКБ
+* `silro_tts.yaml` - настройка параметров tts (Text to Speech) пакета Silero
+* `speech_recognizer_asr.yaml` - настройка параметров пакета speech_recognizer для свободного распознавания и распознавания по грамматике
+* `speech_recognizer_kws.yaml` - настройка параметров пакета speech_recognizer для ключевых слов (wake_phrases) и быстрых команд (fast_commands)
+* `robohead_controller.yaml` - главный конфигурационный файл пакета robohead_controller
 
 Настройка соответствия "голосовая команда - action-скрипт" задается в файле `config/robohead_controller.yaml`.
 
+## TODO проверить ссылку
 Подробнее про настройку параметров написано здесь [->](../../30-device-configuration/30-device-setting/30-changing-device-settings.md)
-
-
----
-
-## Архитектура
-
-#TODO норм схема
-
-```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                        robohead_controller                              │
-│                                                                         │
-│  ┌──────────────┐  ┌──────────────┐  ┌───────────────────────────────┐  │
-│  │ Commander     │  │ BatteryMonitor│  │ ActionManager                │  │
-│  │               │  │               │  │                             │  │
-│  │ Очередь:      │  │ Проверяет     │  │ Загружает и выполняет       │  │
-│  │ wake_phrases  │  │ напряжение    │  │ Python-скрипты действий     │  │
-│  │ commands      │  │ каждые 0.5с   │  │ в изолированных потоках     │  │
-│  │ fast_commands │  │               │  │                             │  │
-│  └──────┬───────┘  └──────┬───────┘  └──────────────┬──────────────┘  │
-│         │                  │                         │                  │
-│  ┌──────┴──────────────────┴─────────────────────────┴──────────────┐  │
-│  │                      Driver Connectors                            │  │
-│  │                                                                    │  │
-│  │  ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌───────────────┐  │  │
-│  │  │ MediaDriver│ │ EarsDriver │ │ NeckDriver │ │ SensorDriver  │  │  │
-│  │  │ Connector  │ │ Connector  │ │ Connector  │ │ Connector     │  │  │
-│  │  └────────────┘ └────────────┘ └────────────┘ └───────────────┘  │  │
-│  │  ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌───────────────┐  │  │
-│  │  │ Respeaker  │ │ ASR        │ │ KWS        │ │ UsbCam        │  │  │
-│  │  │ Connector  │ │ Connector  │ │ Connector  │ │ Connector     │  │  │
-│  │  └────────────┘ └────────────┘ └────────────┘ └───────────────┘  │  │
-│  └────────────────────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────────────────┘
-         │                                            │
-         ▼                                            ▼
-   ROS2 сервисы/топики                        Python-скрипты
-   драйверов                                  actions/*.py
-```
 
 ---
 
 ## Основной цикл работы
-
-#TODO норм цикл
-
-```
-1. Запуск → инициализация всех коннекторов
-2. connect_all_drivers() → ожидание доступности всех сервисов
-3. Выполнение действия "std_startup" (приветствие)
-4. Включение KWS (режим 1)
-5. BatteryMonitor проверяет напряжение → разрешает/запрещает работу
-6. При разрешении работы → действие "std_wait" (ожидание)
-
-Основной цикл Commander (10 Гц):
-  ├── Есть fast_command? → execute_action(fast_command, cancelling=False)
-  ├── Состояние "wait_wake_phrase":
-  │     └── Пришла wake phrase? → 
-  │           ├── execute_action("std_attention")
-  │           ├── ASR → mode=1 (Grammar)
-  │           ├── KWS → mode=0 (Off)
-  │           └── Переход в "wait_command"
-  └── Состояние "wait_command":
-        └── Пришла команда? →
-              ├── Если команда (не таймаут) → execute_action(команда, on_complete="std_wait")
-              ├── Если таймаут → execute_action("std_wait")
-              ├── KWS → mode=1 (On)
-              └── Переход в "wait_wake_phrase"
-```
+![Состояния robohead_controller](../attachments/state_machine.png)
 
 ---
 
@@ -240,8 +182,9 @@ robohead_controller
 
 Управляет запуском, отменой и изоляцией действий:
 
-- **`execute_action(name, on_complete, cancelling)`** — запуск действия:
-  - Если `cancelling=True` — отменяет текущее действие перед запуском нового.
+- **`execute_action(name:str, on_complete: Optional[str], cancelling:bool)`** — запуск действия:
+  - Если `cancelling=True` — отменяет текущее действие перед запуском нового (обычное действие).
+  - Если `cancelling=False` — НЕ отменяет текущее действие перед запуском (быстрое действие).
   - Действие выполняется в **отдельном daemon-потоке**.
   - После успешного завершения может автоматически запустить действие `on_complete`.
 
@@ -254,8 +197,8 @@ robohead_controller
 
 | Условие | Действие |
 |---------|----------|
-| `voltage < low_voltage_threshold` и работа разрешена | Запрещает работу (`is_allow_work = False`), запускает `std_low_bat` |
-| `voltage ≥ (threshold + hysteresis)` и работа запрещена | Разрешает работу (`is_allow_work = True`), запускает `std_wait` |
+| `voltage < low_voltage_threshold` и работа разрешена (`is_allow_work == True`) | Запрещает работу (`is_allow_work = False`), запускает `std_low_bat` |
+| `voltage ≥ (threshold + hysteresis)` и работа запрещена (`is_allow_work == False`) | Разрешает работу (`is_allow_work = True`), запускает `std_wait` |
 
 Гистерезис предотвращает частое переключение при напряжении вблизи порога.
 
@@ -264,15 +207,8 @@ robohead_controller
 Работает с частотой **10 Гц**, реализует конечный автомат:
 
 #TODO сделать хорошую картинку конечного автомата
+![Конечный автомат commander.py](../attachments/commander_scheme.png)
 
-```
-┌────────────────────┐        wake phrase        ┌─────────────────┐
-│  wait_wake_phrase  │ ─────────────────────────▶ │  wait_command   │
-│                    │                            │                 │
-│  KWS: on           │        command/timeout     │  KWS: off       │
-│  ASR: off          │ ◀───────────────────────── │  ASR: grammar   │
-└────────────────────┘                            └─────────────────┘
-```
 
 **Быстрые команды** обрабатываются **в любом состоянии** без прерывания текущего действия (`cancelling=False`).
 
@@ -320,6 +256,10 @@ robohead_controller
 | `battery_voltage` | Текущее напряжение (В) |
 | `battery_current` | Текущий ток (А) |
 | `battery_power_supply_status` | Статус питания |
+| `battery_power_supply_technology` | Тип АКБ (Li-Ion) |
+| `battery_state` | "Сырое" сообщение BatteryState |
+
+
 
 ### `RespeakerDriverConnector`
 
@@ -328,14 +268,23 @@ robohead_controller
 | `connect()` | Подключение к сервисам LED и подписка на DOA, аудио |
 | `doa` | Текущий угол DOA (градусы) |
 | `audio_main` | Последний аудиофрейм основного канала |
+| `set_led_mode(cancel_event, mode)` | Устанавливает режим работы LED-кольца |
+| `set_led_brightness(cancel_event, value)` | Устанавливает яркость LED-кольца |
+| `set_led_color_all(cancel_event, red, green, blue)` | Устанавливает одинаковый цвет всем светодиодам LED-кольца |
+| `set_led_color_palette(cancel_event, red_a, green_a, blue_a, red_b, green_b, blue_b)` | Устанавливает двухцветную палитру для анимационных режимов LED |
+| `set_led_color_manual(cancel_event, colors)` | Устанавливает каждому (из 12) светодиоду LED-кольца отдельный цвет |
+
+
 
 ### `SpeechRecognizerAsrConnector`
 
 | Метод | Описание |
 |-------|----------|
-| `connect()` | Подключение к сервису `set_mode` и подписка на `commands` |
+| `connect()` | Подключение к сервису `set_mode` и подписка на `commands`, `frees` |
 | `set_mode(mode)` | Установка режима ASR (0/1/2) |
 | Колбэк `commands` | Полученные команды добавляются в `controller.queue_commands` |
+| Колбэк `frees` | Полученные команды добавляются в `controller.queue_frees` |
+
 
 ### `SpeechRecognizerKwsConnector`
 
@@ -393,15 +342,18 @@ def run(controller, action_name: str, cancel_event: threading.Event):
 | `std_make_photo` | `actions/std_make_photo/action.py` | Фотографирование с камеры |
 | `std_left_ear` | `actions/std_left_ear/action.py` | Демонстрация левого уха |
 | `std_right_ear` | `actions/std_right_ear/action.py` | Демонстрация правого уха |
+| `std_show_voltage` | `actions/std_show_voltage/action.py` | Показывает текущие напряжение и ток на АКБ |
+| `std_echo` | `actions/std_echo/action.py` | Записывает вашу речь и повторяет своим голосом |
+| `std_llm` | `actions/std_llm/action.py` | Распознает ваш вопрос и отправляет большой языковой модели, полученный от неё ответ озвучивается
 
 ### Быстрые действия (Fast Actions)
 
-Выполняются **без прерывания** текущего действия (`cancelling=False`). Используются для команд, которые должны сработать мгновенно.
+Выполняются **без прерывания** текущего действия (`cancelling=False`). Используются для команд, которые должны сработать мгновенно. Для их вызова обращаться к роботу (**"Слушай, Робот!"**) не нужно!
 
 | Имя | Файл | Описание |
 |-----|------|----------|
-| `громче` | `fast_actions/std_volume_up/action.py` | Увеличение громкости на 10. При достижении максимума — звуковое уведомление |
-| `тише` | `fast_actions/std_volume_down/action.py` | Уменьшение громкости на 10 |
+| `громче` | `fast_actions/std_volume_up/action.py` | Увеличение громкости на 10%. При достижении максимума — звуковое уведомление |
+| `тише` | `fast_actions/std_volume_down/action.py` | Уменьшение громкости на 10% |
 
 ### Маппинг действий (`actions_match`)
 
@@ -414,7 +366,7 @@ actions_match: >
     "std_wait":           "std_wait/action.py",
     "поздоровайся":       "std_greeting/action.py",
     "покажи уши":         "std_ears/action.py",
-    "громче":             "/absolute/path/to/action.py"
+    "громче":             "std_volume_up/action.py"
   }
 ```
 
@@ -493,6 +445,7 @@ usb_cam:
 ```bash
 ros2 launch robohead_controller robohead_controller.launch.py
 ```
+> Эта же команда запускается из скрипта ~/start.sh, который вызывается автоматически при запуске Rasperry Pi сервисом robohead.service
 
 Последовательность:
 1. `dependencies.launch.py` — запуск всех драйверов.
@@ -522,8 +475,7 @@ ros2 launch robohead_controller dependencies.launch.py
 ---
 
 ## Пример создания нового действия
-#TODO описать подробнее в документации 
-1. Создать файл действия
+1. Создать папку действия в `robohead_controller/robohead_controller/actions/` и скрипт `action.py`
 2. Добавить в маппинг (`robohead_controller.yaml`)
 3. Добавить команду в ASR (`speech_recognizer_asr.yaml`)
 4. Пересобрать и запустить
