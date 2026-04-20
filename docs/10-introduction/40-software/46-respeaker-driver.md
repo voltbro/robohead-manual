@@ -4,167 +4,435 @@ slug: respeaker_driver
 title: "Пакет respeaker_driver"
 sidebar_label: "respeaker_driver"
 description: "respeaker_driver"
-draft: true
+draft: false
 ---
 
-# Пакет `respeaker_driver`
 
-**Назначение:** Пакет `respeaker_driver` обеспечивает взаимодействие с микрофонным массивом [ReSpeaker USB Mic Array](https://wiki.seeedstudio.com/ReSpeaker-USB-Mic-Array/), включая:
+# Документация: ROS2 нода `respeaker_driver`
 
-* фильтрацию шумов и эхоподавление
-* подавление звуков, проигрываемых устройством (аппаратный эхо-миксер)
-* определение направления источника звука (direction of arrival (doa))
-* управление встроенными светодиодами (pixel ring)
+## Общее описание
+
+Нода `respeaker_driver` обеспечивает взаимодействие с микрофонными массивами **ReSpeaker** (модели на базе **XVF3000** и **XVF3800**) от Seeed Studio. Нода выполняет три основные функции:
+
+1. **Захват аудио** — многоканальная запись звука через PortAudio с публикацией в ROS-топики (основной канал + все каналы по отдельности).
+2. **Определение направления звука (DOA)** — чтение угла направления источника звука с устройства по USB и публикация в топик.
+3. **Управление LED-кольцом** — установка режимов подсветки, яркости, цвета через сервисы и топики.
+
+Нода автоматически определяет модель ReSpeaker (XVF3000 или XVF3800) и количество аудиоканалов. Используется **MultiThreadedExecutor** для параллельной обработки.
+
 ---
 
-## Содержание пакета
+## Поддерживаемые устройства
 
-```text
-respeaker_driver/
-├── CMakeLists.txt
-├── package.xml
-├── setup.py
-├── launch/
-│   └── respeaker_driver.launch
-├── config/
-│   └── respeaker_driver.yaml
-├── scripts/
-│   └── main.py
-│   └── respeaker_driver_dependencies/
-│     └── pixel_ring.py
-│     └── utils.py
-└── examples/
-    └── example_recording.py
+| Модель | Чип | VID | PID | Каналы | LED | 
+|--------|-----|-----|-----|--------|-----|
+| ReSpeaker Mic Array v2.0 | XVF3000 | `0x2886` | `0x0018` | до 6 | 12 шт. | 
+| ReSpeaker USB Mic Array | XVF3800 | `0x2886` | `0x001A` | до 6 | 12 шт. |
+
+При `vendor_id = 0` и `product_id = 0` в конфиг-файле устройство определяется автоматически (сначала проверяется XVF3800, затем XVF3000).
+
+---
+
+## Топики
+
+### Публикуемые
+
+### `<namespace>/audio/main`
+
+| Поле | Значение |
+|------|----------|
+| **Тип** | `robohead_interfaces/msg/AudioData` |
+| **Имя по умолчанию** | `audio/main` (настраивается параметром `ros.topic_name.audio_main`) |
+| **QoS** | глубина очереди 10 |
+
+Аудиоданные **основного канала** (номер задаётся параметром `audio.main_channel`). Формат: массив `int16` длиной `frames_per_buffer`.
+
+---
+
+### `<namespace>/audio/channel_<N>`
+
+| Поле | Значение |
+|------|----------|
+| **Тип** | `robohead_interfaces/msg/AudioData` |
+| **Имя по умолчанию** | `audio/channel_0` … `audio/channel_5` |
+| **QoS** | глубина очереди 10 |
+
+Аудиоданные **каждого канала** микрофонного массива. Количество активных топиков определяется числом каналов устройства (или параметром `audio.count_of_channels`). Максимум — 6 каналов.
+
+---
+
+### `<namespace>/doa`
+
+| Поле | Значение |
+|------|----------|
+| **Тип** | `std_msgs/msg/Int32` |
+| **Имя по умолчанию** | `doa` (настраивается параметром `ros.topic_name.doa`) |
+| **QoS** | глубина очереди 10 |
+
+Угол направления источника звука (**Direction of Arrival**) в градусах. Публикуется при каждом заполнении аудиобуфера (частота ≈ `sample_rate / frames_per_buffer` Гц).
+
+Значение корректируется с учётом параметра `doa_yaw_offset` (поворот системы координат).
+
+#TODO картинка с углами DOA
+
+---
+
+### Подписки
+
+### `<namespace>/set_color_manual`
+
+| Поле | Значение |
+|------|----------|
+| **Тип** | `robohead_interfaces/msg/ColorArray` |
+| **Имя по умолчанию** | `set_color_manual` (настраивается параметром `ros.topic_name.set_color_manual`) |
+| **QoS** | глубина очереди 10 |
+
+Ручная установка цвета **каждого светодиода** индивидуально. Сообщение должно содержать массив из **ровно 12** цветов (`Color[]`). При несовпадении количества — предупреждение, команда игнорируется.
+
+#### Формат `Color`
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| `red` | `uint8` | Красный (0–255) |
+| `green` | `uint8` | Зелёный (0–255) |
+| `blue` | `uint8` | Синий (0–255) |
+
+---
+
+## Сервисы
+
+### 1. `<namespace>/set_mode`
+
+| Поле | Значение |
+|------|----------|
+| **Тип** | `robohead_interfaces/srv/SimpleCommand` |
+| **Имя по умолчанию** | `set_mode` (настраивается параметром `ros.service_name.set_mode`) |
+
+Установка режима работы LED-кольца.
+На запись/воспроизведенеи звука никак не влияют. Являются просто световыми эффектами.
+
+#### Запрос
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| `data` | `int16` | Номер режима (0–5) |
+
+#### Ответ
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| `data` | `int16` | `0` — успех, `-1` — ошибка |
+
+#### Режимы по моделям
+
+| Код | XVF3000 | XVF3800 |
+|-----|---------|---------|
+| `0` | Выключить LED | Выключить LED |
+| `1` | Trace (направление звука) | DOA (направление звука) |
+| `2` | Listen (прослушивание) | Rainbow (радуга) |
+| `3` | Wait (ожидание) | Single color (один цвет) |
+| `4` | Speak (речь) | Breathe (дыхание) |
+| `5` | Spin (вращение) | Ring (кольцо) |
+
+#TODO описать поведения разных эффектов, приложить фото/видео
+
+---
+
+### 2. `<namespace>/set_brightness`
+
+| Поле | Значение |
+|------|----------|
+| **Тип** | `robohead_interfaces/srv/SimpleCommand` |
+| **Имя по умолчанию** | `set_brightness` (настраивается параметром `ros.service_name.set_brightness`) |
+
+Установка яркости LED-кольца.
+
+#### Запрос
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| `data` | `int16` | Яркость |
+
+#### Допустимые значения
+
+| Модель | Диапазон |
+|--------|----------|
+| XVF3000 | 0–31 |
+| XVF3800 | 0–255 |
+
+#### Ответ
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| `data` | `int16` | `0` — успех, `-1` — ошибка |
+
+---
+
+### 3. `<namespace>/set_color_all`
+
+| Поле | Значение |
+|------|----------|
+| **Тип** | `robohead_interfaces/srv/Color` |
+| **Имя по умолчанию** | `set_color_all` (настраивается параметром `ros.service_name.set_color_all`) |
+
+Установка одного цвета для **всех** 12 светодиодов одновременно.
+
+#### Запрос
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| `red` | `uint8` | Красный (0–255) |
+| `green` | `uint8` | Зелёный (0–255) |
+| `blue` | `uint8` | Синий (0–255) |
+
+#### Ответ
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| `data` | `int16` | `0` — успех, `-1` — ошибка |
+
+---
+
+### 4. `<namespace>/set_color_palette`
+
+| Поле | Значение |
+|------|----------|
+| **Тип** | `robohead_interfaces/srv/ColorPalette` |
+| **Имя по умолчанию** | `set_color_palette` (настраивается параметром `ros.service_name.set_color_palette`) |
+
+Установка **двухцветной палитры** для анимационных режимов LED (DOA, breathe и т.д.).
+
+#### Запрос
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| `color_a` | `Color` | Первый цвет палитры (RGB) |
+| `color_b` | `Color` | Второй цвет палитры (RGB) |
+
+#### Ответ
+
+| Поле | Тип | Описание |
+|------|-----|----------|
+| `data` | `int16` | `0` — успех, `-1` — ошибка |
+
+---
+
+## Параметры конфигурации
+
+Файл: `config/respeaker_driver.yaml`
+
+### USB
+
+| Параметр | Тип | По умолчанию | Описание |
+|----------|-----|-------------|----------|
+| `usb.vendor_id` | `int` | `0` | Vendor ID устройства. `0` — автоопределение (0x2886) |
+| `usb.product_id` | `int` | `0` | Product ID устройства. `0` — автоопределение (перебор XVF3800 → XVF3000) |
+| `usb.timeout` | `int` | `5000` | Таймаут USB-передачи данных (мс) |
+| `usb.sleep_reset` | `int` | `10000` | Время ожидания после USB reset для переинициализации (мс) |
+| `usb.sleep_stop` | `int` | `100` | Время ожидания при завершении работы ноды (мс) |
+
+### Аудио
+
+| Параметр | Тип | По умолчанию | Описание |
+|----------|-----|-------------|----------|
+| `audio.sample_rate` | `int` | `16000` | Частота дискретизации (Гц) |
+| `audio.frames_per_buffer` | `int` | `1024` | Размер аудиобуфера (фреймов). Определяет частоту публикации: `sample_rate / frames_per_buffer` Гц |
+| `audio.count_of_channels` | `int` | `0` | Количество каналов. `0` — автоопределение (макс. 6) |
+| `audio.main_channel` | `int` | `0` | Номер основного канала (0-индексация) |
+| `audio.device_name_primary` | `string` | `"ReSpeaker"` | Имя аудиоустройства для поиска в PortAudio |
+| `audio.device_name_fallback` | `string` | `"Mic Array"` | Запасное имя (после USB reset имя может измениться) |
+
+### DOA
+
+| Параметр | Тип | По умолчанию | Описание |
+|----------|-----|-------------|----------|
+| `doa_yaw_offset` | `double` | `0.0` | Смещение нулевого положения DOA (градусы). `>0` — против часовой стрелки, `<0` — по часовой |
+
+### Имена топиков
+
+| Параметр | Тип | По умолчанию | Описание |
+|----------|-----|-------------|----------|
+| `ros.topic_name.audio_main` | `string` | `"audio/main"` | Топик основного аудиоканала |
+| `ros.topic_name.audio_channel_0` … `audio_channel_5` | `string` | `"audio/channel_0"` … `"audio/channel_5"` | Топики индивидуальных каналов |
+| `ros.topic_name.doa` | `string` | `"doa"` | Топик угла направления звука |
+| `ros.topic_name.set_color_manual` | `string` | `"set_color_manual"` | Топик для ручного управления LED |
+
+### Имена сервисов
+
+| Параметр | Тип | По умолчанию | Описание |
+|----------|-----|-------------|----------|
+| `ros.service_name.set_mode` | `string` | `"set_mode"` | Сервис установки режима LED |
+| `ros.service_name.set_brightness` | `string` | `"set_brightness"` | Сервис установки яркости |
+| `ros.service_name.set_color_all` | `string` | `"set_color_all"` | Сервис установки цвета всех LED |
+| `ros.service_name.set_color_palette` | `string` | `"set_color_palette"` | Сервис установки палитры |
+
+---
+
+### Поток данных
+
+1. **PortAudio callback** заполняет буфер -> публикует аудиоданные по каналам -> вызывает `onAudioFrame()`.
+2. **onAudioFrame()** читает DOA-угол с устройства по USB -> публикует в топик `doa`.
+3. **Сервисы/топики LED** передают команды в `UsbHandler` -> USB control transfer на устройство.
+
+---
+
+
+
+## Процедура инициализации
+
+```
+1. Объявление параметров
+2. USB: автоопределение устройства (XVF3800 → XVF3000)
+3. USB: открытие устройства (libusb)
+4. Audio: инициализация PortAudio
+5. Audio: поиск аудиоустройства по имени
+6. (если не найдено) → USB reset → повторный поиск
+7. Audio: определение количества каналов
+8. Audio: создание ROS-паблишеров
+9. Audio: открытие аудиопотока (PortAudio callback)
+10. ROS: создание сервисов и подписок для LED
+11. Готово → "INITED [xvf3000/xvf3800] channels=N"
 ```
 
 ---
 
-## Запуск пакета
-
-- Пакет `respeaker_driver` запускается автоматически при старте устройства.
-- Запуск инициируется через launch-файл `robohead_controller_py.launch` из пакета `robohead_controller`.
-
----
-
-## Основные возможности
-
-**Доступные ROS-топики**
-
-* **`/robohead_controller/respeaker_driver/audio/channel_0`**
-  **Тип:** `audio_common_msgs/AudioData`
-  Аппаратно-обработанный звук с микрофонного модуля.
-
-* **`/robohead_controller/respeaker_driver/audio/channel_1`**
-  **Тип:** `audio_common_msgs/AudioData`
-  Звук с микрофона №1 микрофонного модуля.
-
-* **`/robohead_controller/respeaker_driver/audio/channel_2`**
-  **Тип:** `audio_common_msgs/AudioData`
-  Звук с микрофона №2 микрофонного модуля.
-
-* **`/robohead_controller/respeaker_driver/audio/channel_3`**
-  **Тип:** `audio_common_msgs/AudioData`
-  Звук с микрофона №3 микрофонного модуля.
-
-* **`/robohead_controller/respeaker_driver/audio/channel_4`**
-  **Тип:** `audio_common_msgs/AudioData`
-  Звук с микрофона №4 микрофонного модуля.
-
-* **`/robohead_controller/respeaker_driver/audio/channel_5`**
-  **Тип:** `audio_common_msgs/AudioData`
-  Звук, подающийся на воспроизведение через динамики.
-
-* **`/robohead_controller/respeaker_driver/audio/main`**
-  **Тип:** `audio_common_msgs/AudioData`
-  Главный аудиоканал для программной обработки (например, распознавания команд). Дублирует один из каналов 0–5 (по умолчанию канал 0).
-
-* **`/robohead_controller/respeaker_driver/doa_angle`**
-  **Тип:** `std_msgs/Int16`
-  Угол поступления звука в градусах (от -180 до 180).
-  *(DOA — Direction of Arrival)*. Красный светодиод (по-умолчанию) на светодиодном кольце указывает направление.
-
-* **`/robohead_controller/respeaker_driver/SetColorManualLED`**
-  **Тип:** `std_msgs/ColorRGBA[12]`
-  Топик для установки цвета каждого светодиода в отдельности. 
-
-2. **Доступные ROS-сервисы**
-
-* **`/robohead_controller/respeaker_driver/SetBrightnessLED`**
-  **Тип:** `audio_common_msgs/AudioData`
-  Сервис для установки яркости всей подсветки.
-
-* **`/robohead_controller/respeaker_driver/SetColorAllLED`**
-  **Тип:** `audio_common_msgs/AudioData`
-  Сервис для установки одинакового цвета на всю подсветку.
-
-* **`/robohead_controller/respeaker_driver/SetColorPaletteLED`**
-  **Тип:** `audio_common_msgs/AudioData`
-  Сервис для задачи цвета следяющего светодиода и цвета остальных светодиодов (устанавливает палитру для предустановленных режимов работы).
-
-* **`/robohead_controller/respeaker_driver/SetModeLED`**
-  **Тип:** `audio_common_msgs/AudioData`
-  Сервис для переключения режимов работы светодиодного кольца.
-
-![Направление поступления звука по градусами](../attachments/Head_v2_respeaker.jpg)
-
-2. **Управление светодиодным кольцом (Pixel Ring)**
-
-   Подробнее об управлении подсветкой микрофонного модуля: [->](../../30-device-configuration/30-device-setting/35-microphone-backlight-control.md)
-
-## Режим отладки
-
-В режиме отладки пакет `respeaker_driver` запускается изолированно (отдельно) для тестирования функций, без участия других компонентов системы.
-
-### Шаг 1. Остановка всех запущенных пакетов
-
-Остановите фоновый Linux-сервис:
+## Сборка
 
 ```bash
-sudo systemctl stop robohead.service
+colcon build --symlink-install --packages-select robohead_interfaces respeaker_driver
+```
+
+## Запуск
+
+```bash
+ros2 launch respeaker_driver respeaker_driver.launch.py 
+```
+Вывод при успешном запуске:
+```
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [respeaker_driver_node-1]: process started with pid [4938]
+[respeaker_driver_node-1] [INFO] [1773678691.497532071] [respeaker_driver.respeaker_driver]: Detected: xvf3800  VID=0x2886  PID=0x001A
+[respeaker_driver_node-1] [WARN] [1773678691.744992526] [respeaker_driver.respeaker_driver]: Audio device 'ReSpeaker' not found. Trying USB reset...
+[respeaker_driver_node-1] [INFO] [1773678702.247496844] [respeaker_driver.respeaker_driver]: Found audio device: reSpeaker XVF3800 4-Mic Array: USB Audio (hw:1,0) (2 channels)
+[respeaker_driver_node-1] [INFO] [1773678702.247573066] [respeaker_driver.respeaker_driver]: Auto-detected 2 audio channels
+[respeaker_driver_node-1] [INFO] [1773678702.274158191] [respeaker_driver.respeaker_driver]: INITED [xvf3800]  channels=2
 ```
 
 ---
 
-### Шаг 2. Запуск пакета вручную
-Запустите пакет отдельно через launch-файл:
+## Примеры взаимодействия
+
+### Из командной строки
+#TODO проверить работу с LED на двух версиях мирокофнов
 ```bash
-roslaunch respeaker_driver respeaker_driver.launch
+# Включить режим LED "trace" (XVF3000) / "DOA" (XVF3800)
+ros2 service call /respeaker_driver/set_mode robohead_interfaces/srv/SimpleCommand "{data: 1}"
+
+# Выключить LED
+ros2 service call /respeaker_driver/set_mode robohead_interfaces/srv/SimpleCommand "{data: 0}"
+
+# Установить яркость (XVF3000: 0-31, XVF3800: 0-255)
+ros2 service call /respeaker_driver/set_brightness robohead_interfaces/srv/SimpleCommand "{data: 15}"
+
+# Установить все LED в красный цвет
+ros2 service call /respeaker_driver/set_color_all robohead_interfaces/srv/Color \
+  "{red: 255, green: 0, blue: 0}"
+
+# Установить каждый LED в отдельный цвет
+ros2 topic pub /respeaker_driver/set_color_manual robohead_interfaces/msg/ColorArray 'colors: [
+{"red":255, "green":255, "blue":0},
+{"red":255, "green":255, "blue":0},
+{"red":255, "green":255, "blue":0},
+{"red":255, "green":255, "blue":0},
+
+{"red":255, "green":255, "blue":0},
+{"red":255, "green":255, "blue":0},
+{"red":255, "green":255, "blue":0},
+{"red":255, "green":255, "blue":0},
+
+{"red":255, "green":255, "blue":0},
+{"red":255, "green":255, "blue":0},
+{"red":255, "green":255, "blue":0},
+{"red":255, "green":255, "blue":0}
+]'
+
+# Установить палитру (зелёный + синий)
+ros2 service call /respeaker_driver/set_color_palette robohead_interfaces/srv/ColorPalette \
+  "{color_a: {red: 0, green: 255, blue: 0}, color_b: {red: 0, green: 0, blue: 255}}"
+
+# Прослушать DOA-угол
+ros2 topic echo /respeaker_driver/doa
+
+# Прослушать основной аудиоканал
+ros2 topic echo /respeaker_driver/audio/main
+
+# Проверить частоту публикации аудио
+ros2 topic hz /respeaker_driver/audio/main
+```
+---
+
+
+
+## Утилита `audio_to_wav.py`
+
+Вспомогательный скрипт для записи аудио из ROS2 топика в WAV-файл. Полезен для отладки, проверки качества звука и тестирования микрофонного массива.
+
+### Принцип работы
+
+Скрипт подписывается на указанный аудиотопик, накапливает семплы в течение заданного времени и сохраняет результат в WAV-файл (16 бит, моно). После записи автоматически завершается.
+
+### Параметры
+
+| Параметр | Тип | По умолчанию | Описание |
+|----------|-----|-------------|----------|
+| `topic` | `string` | `"audio/main"` | Имя топика с аудиоданными |
+| `filename` | `string` | `"output.wav"` | Имя выходного WAV-файла |
+| `duration` | `double` | `5.0` | Длительность записи (секунды) |
+| `sample_rate` | `int` | `16000` | Частота дискретизации (Гц). Должна совпадать с настройкой `respeaker_driver` |
+
+### Примеры использования
+
+```bash
+# Запись 5 секунд из основного канала (параметры по умолчанию)
+ros2 run respeaker_driver audio_to_wav.py
+# Аудио-файл будет записан по пути /home/pi/output.wav
+# Запись идет 5 секунд с топика /respeaker_driver/audio/main
+# Если запись "зависла", проверьте, есть ли в топике данные
+
+# Запись 10 секунд из конкретного канала в указанный файл
+ros2 run respeaker_driver audio_to_wav.py --ros-args \
+  -p topic:=/respeaker_driver/audio/channel_0 \
+  -p filename:=channel_0.wav \
+  -p duration:=10.0
+# Файл запишется по пути /home/pi/channel_0.wav
+
+# Запись основного канала с указанием sample_rate
+ros2 run respeaker_driver audio_to_wav.py --ros-args \
+  -p topic:=/respeaker_driver/audio/main \
+  -p filename:=test.wav \
+  -p duration:=3.0 \
+  -p sample_rate:=16000
+```
+
+### Прослушивание результата
+
+```bash
+# Через ALSA
+aplay output.wav
+
+# Через FFmpeg
+ffplay -autoexit output.wav
 ```
 
 ---
 
-### Шаг 3. Особенности работы в режиме отладки
-- **Пространство имен**: топики и сервисы пакета **не имеет приставки** `/robohead_controller/`. Используется `/respeaker_driver/...` вместо `/robohead_controller/respeaker_driver/...`
-
-- **Файл конфигурации**: настройки берутся из `respeaker_driver/config/respeaker_driver.yaml` вместо `robohead_controller/config/respeaker_driver.yaml`
-
----
-
-### Шаг 4. Возможности тестирования
-
-#### Определения направления звука (DOA)
-
-- **Топик**: `/respeaker_driver/doa_angle` (тип сообщения: `std_msgs/Int16`)
-
-**Пример:**
-
-```bash
-# Запустите в отдельном терминале
-rostopic echo /respeaker_driver/doa_angle 
-```
-:::note
-Во время вывода содержимого топика попробуйте щёлкать пальцами с разных сторон.
-:::
-
-#### Пример работы с топиками аудио на Python
-
-Пример для записи звуков из топиков в .wav файл (убедитесь, что пакет запущен в режиме отладки):
-
-```bash
-# Запустите в отдельном терминале
-rosrun respeaker_driver example_recording.py
-```
-
-:::note
-После записи в терминале будут выведены пути до сохраненных файлов.
-:::
+> **Примечание:** Для доступа к USB-устройству без прав root необходимо настроить udev-правила:
+> ```bash
+> sudo tee /etc/udev/rules.d/99-respeaker.rules << 'EOF'
+> SUBSYSTEM=="usb", ATTR{idProduct}=="0018", ATTR{idVendor}=="2886", MODE:="0666"
+> SUBSYSTEM=="usb", ATTR{idProduct}=="001a", ATTR{idVendor}=="2886", MODE:="0666"
+> EOF
+> sudo udevadm control --reload-rules
+> sudo udevadm trigger
+> ```
+> После этого переподключите устройство или перезагрузите систему.
