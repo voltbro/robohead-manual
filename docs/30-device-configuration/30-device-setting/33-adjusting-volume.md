@@ -9,7 +9,7 @@ description: "Настройка громкости динамиков"
 
 # 1. Общая информация
 
-Громкостью динамиков на Робоголове управляет ROS-пакет [**`speakers_driver`**](../../10-introduction/40-software/45-speakers-driver.md). Этот пакет обеспечивает вывод звука на внешние динамики: воспроизведение аудио и установку громкости. 
+Громкостью динамиков на Робоголове управляет ROS-пакет [**`media_driver`**](../../10-introduction/40-software/42-media-driver.md). Этот пакет обеспечивает вывод звука на внешние динамики: воспроизведение аудио и установку громкости. 
 
 Стартовые параметры динамиков настраиваются через управляющий пакет **`robohead_controller`**. Для изменения настроек потребуется доступ к конфигурационным файлам.
 
@@ -24,18 +24,30 @@ sudo systemctl stop robohead.service
 
 # 2. Конфигурационный файл
 
-Основные настройки находятся в конфигурационном файле `~/robohead_ws/src/robohead/robohead_controller/config/speakers_driver.yaml`:
+Основные настройки находятся в конфигурационном файле `~/robohead_ws/src/robohead/robohead_controller/config/media_driver.yaml`:
 
 ```yaml
-# ~/robohead_ws/src/robohead/robohead_controller/config/speakers_driver.yaml
+# ~/robohead_ws/src/robohead2/robohead_controller/config/media_driver.yaml
+/**:
+  ros__parameters:
 
-service_PlayAudio_name: "~PlayAudio"      # Имя ROS-сервиса для воспроизведения аудиофайлов
-service_GetVolume_name: "~GetVolume"      # Имя ROS-сервиса для проверки уровня громкости
-service_SetVolume_name: "~SetVolume"      # Имя ROS-сервиса для установки уровня громкости
-mpd_host: "/run/mpd/socket"               # Адрес MPD-сервера
-mpd_port: 6600                            # Порт MPD-сервера
-update_hz: 10                             # Частота обновления (Гц)
-default_volume: 50                        # Громкость при запуске (0–100)
+    srv_set_volume_name: "set_volume"           # Имя ROS-сервиса для установки уровня громкости
+    srv_get_volume_name: "get_volume"           # Имя ROS-сервиса для проверки уровня громкости
+    srv_play_media_name: "play_media"           # Имя ROS-сервиса для воспроизведения видео/аудио/картинок
+    srv_is_idle_audio_name: "is_idle/audio"     # Имя ROS-сервиса для проверки ожидания воспроизведения аудио
+    srv_is_idle_display_name: "is_idle/display" # Имя ROS-сервиса для проверки ожидания воспроизведения видео/картинок
+
+
+    topic_stream_name: "stream"                 # Имя ROS-топика для потокового вывода изображения
+    stop_command: "__STOP__"                    # Команда для остановки воспроизведения (видео либо звука)
+
+    display_rotate: "270" # Поворот картинки дисплея (по часовой стрелке), 0-359 градусов
+    default_volume: 60.0  # Громкость по-умолчанию при запуске
+
+    # touchscreen config:
+    device_name: "waveshare"                # Имя тачскрина
+    device_path: "/dev/input/"              # Путь для поиска тачскрина
+    topic_touchscreen_name: "touchscreen"   # Имя ROS-топика, куда публикуются касания тачскрина
 ```
 
 # 3. Изменение громкости
@@ -52,7 +64,7 @@ default_volume: 50                        # Громкость при запус
     ```
 3. Откройте файл настроек в текстовом редакторе:
     ```bash
-    nano ~/robohead_ws/src/robohead/robohead_controller/config/speakers_driver.yaml
+    nano ~/robohead_ws/src/robohead2/robohead_controller/config/media_driver.yaml
     ```
 4. Измените параметр `default_volume` (допустимые значения — от 0 до 100).
 
@@ -65,7 +77,7 @@ default_volume: 50                        # Громкость при запус
     ```
 7. Проверьте текущую громкость:
     ```bash
-    rosservice call robohead_controller/speakers_driver/GetVolume "{}"
+     ros2 service call /robohead/media_driver/get_volume robohead_interfaces/srv/SimpleCommand "data: 0"
     ```
 
 ## 3.2 Изменение громкости для текущего сеанса
@@ -75,7 +87,7 @@ default_volume: 50                        # Громкость при запус
 В терминале Робоголовы выполните команду:
 
 ```bash
-rosservice call robohead_controller/speakers_driver/SetVolume "volume: 30"
+ros2 service call /robohead/media_driver/set_volume robohead_interfaces/srv/SimpleCommand "data: 60"
 ```
 
 - **volume**: значение от 0 (звук отключён) до 100 (максимальная громкость)  
