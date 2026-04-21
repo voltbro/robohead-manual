@@ -16,23 +16,23 @@ description: "Изменение действий в стандартных ко
 ---
 
 :::warning
-Любые изменения в стандартных действиях применяются "на лету", после сохранения изменений файлов. Если началось непредсказуемое поведение - запустите пакет `robohead_controller` в ручном режиме (см. далее).
+Любые изменения в **коде (`action.py`)** стандартных действий применяются "на лету", после сохранения изменений файлов. Если началось непредсказуемое поведение - перезапустите сервис `robohead.service` или запустите пакет `robohead_controller` в ручном режиме (см. далее).
 :::
 
 
 ## 1. Расположение файлов стандартных действий
 
-Стандартные действия находятся в папке `robohead_controller_actions` пакета [`robohead_controller`](../10-introduction/40-software/41-robohead-controller.md). Для `std_ears` перейдите в папку:
-```
-~/robohead_ws/src/robohead/robohead_controller/scripts/robohead_controller_actions/std_ears
+Стандартные действия находятся в папке `~/robohead_ws/src/robohead2/robohead_controller/robohead_controller/actions` пакета [`robohead_controller`](../10-introduction/40-software/41-robohead-controller.md). Для `std_ears` перейдите в папку:
+```bash
+cd ~/robohead_ws/src/robohead2/robohead_controller/robohead_controller/actions/std_ears
 ```
 
 В ней вы увидите три основных файла:
 - **`ears.png`** — картинка с ушами, которая выводится на экран;
 - **`ears.mp3`** — аудиофайл, который воспроизводится через динамики;
-- **`action.py`** — скрипт, описывающий всю логику действия: какие сообщения отправлять, какие сервисы вызывать и в какой последовательности.
+- **`action.py`** — скрипт, описывающий всю логику действия: что выводить на экран/динамики, чем и куда двигать, в какой последовательности.
 
-Пример структуры:
+Пример структуры папки:
 ```
 std_ears/
 ├── ears.png
@@ -47,53 +47,89 @@ std_ears/
 Откройте файл `action.py`. Основной блок кода выглядит примерно так:
 
 ```python
-from robohead_controller_actions.main import *
+# std_ears
+# действие, выполняющееся при команде "Покажи уши"
 
-def run(robohead_controller:RoboheadController, cmds:str):
-    '''
-    Эта функция вызывается, когда вы произносите «Слушай, Робот! Покажи уши».
-    Все инструкции ниже выполняются последовательно.
-    '''
+# Импорты нужны для автоподстановок кода при работе через VSCode
+from __future__ import annotations
+from typing import TYPE_CHECKING
+import os
 
-    # 1. Получаем путь до текущей папки, чтобы легко ссылаться на медиа-файлы
-    script_path = os.path.dirname(os.path.abspath(__file__)) + '/'
-    
-    # 2. Отправляем картинку ушей на экран
-    msg = PlayMediaRequest() # Создаем сообщение для вызова сервиса PlayMedia пакета display_driver
-    msg.is_blocking = 0 # Не ждём завершения воспроизведения
-    msg.is_cycled = 0 # Воспроизведение не зациклено
-    msg.path_to_file = script_path + 'ears.png' # Формируем абсолютный путь до файла, который хотим вывести на экран
-    robohead_controller.display_driver_srv_PlayMedia(msg) # Вызываем сервис PlayMedia с сформированным сообщением
+if TYPE_CHECKING:
+    from robohead_controller.controller import RoboheadController
+    import threading
 
-    # 3. Воспроизводим звук (mp3-файл) через динамики
-    msg = PlayAudioRequest() # Создаем сообщение для вызова сервиса PlayAudio пакета speakers_driver
-    msg.path_to_file = script_path + 'ears.mp3' # Формируем абсолютный путь до файла, который хотим воспроизвести через динамики
-    msg.is_blocking = 0 # Не ждём завершения воспроизведения
-    msg.is_cycled = 0 # Воспроизведение не зациклено
-    robohead_controller.speakers_driver_srv_PlayAudio(msg) # Вызываем сервис с сформированным сообщением
 
-    # 4. Меняем положение шеи: задаём горизонтальный и вертикальный углы
-    msg = NeckSetAngleRequest() # Создаем сообщение для вызова сервиса NeckSetAngle пакета neck_driver
-    msg.horizontal_angle = 0 # Положение шеи по горизонтали 0
-    msg.vertical_angle = 30 # Положение шеи по вертикали 30
-    msg.duration = 1 # Длительность, за которую необходимо достичь заданного положения 1 секунда
-    msg.is_blocking = 0 # Не ждём, пока шея полностью встанет в позицию
-    robohead_controller.neck_driver_srv_NeckSetAngle(msg) # Вызываем сервис с сформированным сообщением
+def run(
+    controller: RoboheadController, action_name: str, cancel_event: threading.Event
+):
+    """
+    Args:
+        controller: Ссылка на контроллер
+        action_name: Команда, по которой было вызвано действие
+        cancel_event: threading.Event для проверки отмены
+    """
+    action_dir = os.path.dirname(os.path.abspath(__file__)) # Путь к папке со скриптом, обычно это:
+    # /home/pi/robohead_ws/build/robohead_controller/robohead_controller/actions/std_ears
 
-    # 5. Меняем угол ушей: левое −30°, правое +30°
-    msg = EarsSetAngleRequest() # Создаем сообщение для вызова сервиса EarsSetAngle пакета ears_driver
-    msg.left_ear_angle = -30 # Левое ухо в положение -30
-    msg.right_ear_angle = 30 # Правое ухо в положенеи 30
-    robohead_controller.ears_driver_srv_EarsSetAngle(msg) # Вызываем сервис с сформированным сообщением
+    logger = controller.get_logger()        # logger - объект логирования, через него можно печатать в консоль
+    logger.info(f"[{action_name}] start")   # выводим в терминал "[std_ears] start"
 
-    # 6. Добавляем «игривое» подёргивание ушами 5 раз
-    k=-1 # Переменная, меняющая направление положения ушей
-    for _ in range(5): # Цикл, повторяющий подергивания ушей 5 раз
-        rospy.sleep(0.5) # Ждём полсекунды
-        msg.left_ear_angle = -30*k # Левое ухо в положение -30*k
-        msg.right_ear_angle = 30*k # Правое ухо в положение 30*k
-        k*=-1 # Меняем направление ушей
-        robohead_controller.ears_driver_srv_EarsSetAngle(msg) # Вызываем сервис с сформированным сообщением
+    # Выводим картинку ears.png без зацикливания воспроизведения (это же картинка) и блокирования вызова
+    controller.media_driver.play_display(
+        cancel_event=cancel_event,
+        video_path=os.path.join(action_dir, "ears.png"),
+        loop=False,
+        block=False,
+    )
+
+    # Проигрываем звук ears.mp3 без зацикливания воспроизведения и блокирования вызова
+    controller.media_driver.play_audio(
+        cancel_event=cancel_event,
+        audio_path=os.path.join(action_dir, "ears.mp3"),
+        loop=False,
+        block=False,
+    )
+
+    for k in range(5): # Цикл 5 раз
+        # Поворачиваем голову
+        controller.neck_driver.set_angle(
+            cancel_event=cancel_event,
+            horizontal=15 * (-1) ** k,  # значения будут: 15, -15, 15, -15, 15
+            vertical=15,    # Вертикальный подьем головы 15 градусов
+            duration=0.5,   # Длительность достижения заданной позиции 0.5 секунд
+            block=False,    # Вызов без блокирования
+        )
+        # Поворачиваем уши
+        controller.ears_driver.set_angle(
+            cancel_event=cancel_event,
+            left=90 * (-1) ** k,    # Значения поворота левого уха: 90, -90, 90, -90, 90
+            right=-90 * (-1) ** k,  # Значения поворота правого уха: -90, 90, -90, 90, -90
+            duration=0.5,   # Длительность достижения заданной позиции 0.5 секунд
+            block=True,     # Блокирующий вызов: программа здесь "зависнет" на 0.5 секунд (duration)
+        )
+
+    logger.info(f"[{action_name}] finish")  # выводим в терминал "[std_ears] finish"
+```
+Это был полный код. Условно алгоритм выглядит так:
+```python
+# std_ears
+# действие, выполняющееся при команде "Покажи уши"
+
+def run(controller: RoboheadController, action_name: str, cancel_event: threading.Event):
+    # Выводим картинку ears.png без зацикливания воспроизведения (это же картинка) и блокирования вызова
+    controller.media_driver.play_display(...)
+
+    # Проигрываем звук ears.mp3 без зацикливания воспроизведения и блокирования вызова
+    controller.media_driver.play_audio(...)
+
+    for k in range(5): # Цикл 5 раз
+        # Поворачиваем голову
+        controller.neck_driver.set_angle(...)
+
+        # Поворачиваем уши
+        controller.ears_driver.set_angle(...)
+
 ```
 
 ---
@@ -105,62 +141,99 @@ def run(robohead_controller:RoboheadController, cmds:str):
 ### 3.1 Замена медиа-ресурсов
 
 - **Вывод видео вместо статичного изображения**  
-  1. Поместите свой видеофайл (например, `video.mp4`) в ту же папку.  
-  2. В файле `action.py` измените строчку, где формируется путь до медиафайла:
-  ```diff
-  - msg.path_to_file = script_path + 'ears.png'
-  + msg.path_to_file = script_path + 'video.mp4'
+  1. В папке `std_ears` уже лежит файл `video.mp4`. (При желании вы можете заменить его на свой) 
+  2. В файле `action.py` измените имя файла, который нужно вывести на дисплей :
+
+  Было:
+  ```
+   controller.media_driver.play_display(
+       cancel_event=cancel_event,
+       video_path=os.path.join(action_dir, "ears.png"),
+       loop=False,
+       block=False,
+   )
+  ```
+  Стало:
+  ```
+   controller.media_driver.play_display(
+       cancel_event=cancel_event,
+       video_path=os.path.join(action_dir, "video.mp4"),
+       loop=False,
+       block=False,
+   )
   ```
   После этого скажите голосом: *"Слушай, Робот! Покажи уши"*, и робот покажет видео на экране.
 
-:::warning
-**Важно** Обратите внимание, что размер видео должен быть строго 1080х1080 пикселей!
-:::
-
 - **Изменение звукового сопровождения**  
 
-Бывает хочется, чтобы Робоголова не просто проигрывала короткий звук «Ухи мои ухи», а, например, сначала здоровалась. Для этого:
+Бывает хочется, чтобы Робоголова не просто проигрывала короткий звук «Ухи мои ухи», а, например, сначала здоровалась. Для этого вы можете либо записать аудио-файл (.mp3/.wav) и воспроизвести его, либо запусить синтез речи и Робоголова озучит ваш текст сама.
 
-1. Сохраните файлы `hello.mp3` и `new_sound.mp3` с нужным вам звуком в папке стандартного действия.
-2. Вставьте в код **два** блока «Воспроизведение звука», например:
+**Вариант 1 (воспроизведение готового аудио-файла)**
+
+1. В папке `std_ears` уже лежит файл `audio.mp3`. (При желании вы можете заменить его на свой) 
+2. Вставьте в код `action.py` перед вызовом `controller.media_driver.play_audio(...)` такой же вызов, но с файлом `audio.mp3` и укажите параметр `block=true`. Получится:
    ```python
-   # 1. Сначала приветствие
-   msg = PlayAudioRequest()
-   msg.path_to_file = script_path + 'hello.mp3'
-   msg.is_blocking = 1  # Ждём, пока закончится приветствие
-   msg.is_cycled = 0
-   robohead_controller.speakers_driver_srv_PlayAudio(msg)
+    controller.media_driver.play_audio(
+        cancel_event=cancel_event,
+        audio_path=os.path.join(action_dir, "audio.mp3"),
+        loop=False,
+        block=True,
+    )
 
-   # 2. Затем звук для ушей
-   msg = PlayAudioRequest()
-   msg.path_to_file = script_path + 'new_sound.mp3'
-   msg.is_blocking = 0
-   msg.is_cycled = 0
-   robohead_controller.speakers_driver_srv_PlayAudio(msg)
+    # Проигрываем звук ears.mp3 без зацикливания воспроизведения и блокирования вызова
+    controller.media_driver.play_audio(
+        cancel_event=cancel_event,
+        audio_path=os.path.join(action_dir, "ears.mp3"),
+        loop=False,
+        block=False,
+    )
    ```
-3. Обратите внимание, что **`is_blocking = 1`** означает ожидание завершения воспроизведения аудио перед продолжением выполнения скрипта.
+
+3. Обратите внимание, что **`block = True`** означает ожидание завершения воспроизведения аудио перед продолжением выполнения скрипта.
+
+**Вариант 2 (синтез речи)**
+1. Вставьте в код `action.py` перед вызовом `controller.media_driver.play_audio(...)` вызов `silero_tts.say(...)` с текстом для озвучки. Должно получиться:
+    ```python
+    controller.silero_tts.say(cancel_event=cancel_event, text="Добрый день. Сейчас я покажу вам свои уши!")
+
+    # Проигрываем звук ears.mp3 без зацикливания воспроизведения и блокирования вызова
+    controller.media_driver.play_audio(
+        cancel_event=cancel_event,
+        audio_path=os.path.join(action_dir, "ears.mp3"),
+        loop=False,
+        block=False,
+    )
+    ```
 
 ### 3.2 Настройка положения шеи
 
 - **Изменение угла обзора**  
   Для более выразительной реакции можно поднять голову выше или опустить:
   ```diff
-  - msg.horizontal_angle = 0
-  - msg.vertical_angle = 30
-  + msg.horizontal_angle = 15   # Повернуть голову вправо на 15°
-  + msg.vertical_angle = -20     # Опустить голову вниз на 20°
+  controller.neck_driver.set_angle(
+      cancel_event=cancel_event,
+      horizontal=0 # Фиксированное положение по горизонтали 0 градусов (голова смотрит вперед)
+      vertical=-15,    # Вертикальное опускание головы 15 градусов
+      duration=0.5,   # Длительность достижения заданной позиции 0.5 секунд
+      block=False,    # Вызов без блокирования
+  )
   ```
 - **Изменение скорости движения**  
-  Параметр `duration` отвечает за время выполнения движения. Меньшее значение — более резкое движение:
+  Параметр `duration` отвечает за время выполнения движения. Меньшее значение — более резкое движение, большее - более плавное движение:
   ```diff
-  - msg.duration = 1
-  + msg.duration = 0.5  # Шея повернется быстрее: за 0.5 секунды
+  controller.neck_driver.set_angle(
+      cancel_event=cancel_event,
+      horizontal=0 # Фиксированное положение по горизонтали 0 градусов (голова смотрит вперед)
+      vertical=-15,    # Вертикальное опускание головы 15 градусов
+      duration=1.0,   # Длительность достижения заданной позиции за 1.0 секунду (вместо 0.5)
+      block=False,    # Вызов без блокирования
+  )
   ```
 - **Добавление паузы перед движением**  
-  Чтобы голосовая команда сначала воспроизводила звук и изображение, а через секунду двигала шею:
+  Чтобы голосовая команда сначала воспроизводила звук и изображение, а через 2 секунды двигала шею:
   ```python
-  rospy.sleep(1)  # Пауза 1 секунда
-  msg = NeckSetAngleRequest()
+  controller.sleep(cancel_event=cancel_event, duration=2.0) # Пауза 2 секунды
+  # controller.neck_driver.set_angle(...)
   # ...
   ```
 
@@ -171,31 +244,48 @@ def run(robohead_controller:RoboheadController, cmds:str):
 - **Увеличить количество повторений**  
   Измените `range(5)` на большее значение, например:
   ```diff
-  - for _ in range(5):
-  + for _ in range(10):  # Подергивание 10 раз
+  - for k in range(5):
+  + for k in range(10):  # Подергивание 10 раз
   ```
 
 - **Увеличить интервал**  
   Чтобы подергивания были медленнее (интервал 1 секунда):
-  ```diff
-  - rospy.sleep(0.5)
-  + rospy.sleep(1)
+  ```python
+  controller.ears_driver.set_angle(
+      cancel_event=cancel_event,
+      left=90 * (-1) ** k,    
+      right=-90 * (-1) ** k,  
+      duration=1.0,   # Длительность достижения заданной позиции 1.0 секунда
+      block=True,     
+  )
   ```
 
 - **Сложная анимация**  
   Можно задать последовательность углов в списке:
   ```python
-  angles = [-30, 0, 30, 0, -30]  # Последовательность позиций
+  # Поворачиваем голову
+  controller.neck_driver.set_angle(
+      cancel_event=cancel_event,
+      horizontal=0,
+      vertical=15,    
+      duration=0.5,  
+      block=False,    
+  )    
+  angles = [30, -30, 45, -45, 90, -90]
   for angle in angles:
-      msg.left_ear_angle = -angle
-      msg.right_ear_angle = angle
-      robohead_controller.ears_driver_srv_EarsSetAngle(msg)
-      rospy.sleep(0.4)
+      # Поворачиваем уши
+      controller.ears_driver.set_angle(
+          cancel_event=cancel_event,
+          left=angle,   
+          right=angle,  
+          duration=0.5,   # Длительность достижения заданной позиции 0.5 секунд
+          block=True,     # Блокирующий вызов: программа здесь "зависнет" на 0.5 секунд (duration)
+      )
   ```
 
 ## 4. Запуск пакета `robohead_controller` в ручном режиме
 
-Для тестирования бывает удобно запустить пакет `robohead_controller` в ручном режиме, чтобы видеть появляющиеся ошибки и информацию для отладки (например, если в скрипте вы что-то выводили через функцию `print()`).
+Для тестирования бывает удобно запустить пакет `robohead_controller` в ручном режиме, чтобы видеть появляющиеся ошибки и информацию для отладки.
 
 ### Шаг 1. Остановка Ubuntu-сервиса
 
@@ -211,24 +301,32 @@ sudo systemctl stop robohead.service
 
 Запустите пакет отдельно через launch-файл:
 ```bash
-roslaunch robohead_controller robohead_controller_py.launch
+ros2 launch robohead_controller robohead_controller.launch.py
 ```
 На экране терминала должен появиться примерно следующий вывод:
 
-![Запуск без ошибок](attachments/robohead-launch.png)
+![Запуск без ошибок](attachments/robohead_controller-launch.png)
+
+Дождитесь полного запуска - Робоголова выведет изображение и поздоровается.
 
 ## 5. Отладка команд
 В этом шаге описано как запускать стандартные действия, не произнося каждый раз голосом нужную команду.
 
 Отлаживать команды можно как при автоматически запущенном `robohead_controller` (через Ubuntu-сервис), так и когда он запущен в ручном режиме (этот вариант предпочтительнее для отладки, так как видны все возникающие ошибки)
 
-Откройте новое окно терминала, подключитесь к Робоголове и опубликуйте "**покажи уши**" в топик `/robohead_controller/voice_recognizer_pocketsphinx/cmds_recognizer/commands`
-
+Откройте новое окно терминала, подключитесь к Робоголове.
+Далее нужно опубликовать Робоголове ключевую фразу:
 ```bash
-# Запустите в отдельном терминале
-rostopic pub /robohead_controller/voice_recognizer_pocketsphinx/cmds_recognizer/commands std_msgs/String "data: 'покажи уши'"
+ros2 topic pub /robohead/speech_recognizer/kws/wake_phrases std_msgs/msg/String "data: 'слушай робот'" --once
+```
+
+И, пока не прошел таймаут, успеть опубликовать команду, которую нужно запустить:
+```bash
+ros2 topic pub /robohead/speech_recognizer/asr/commands std_msgs/msg/String "data: 'покажи уши'" --once
 ```
 
 После публикации команды Робоголова должна выполнить стандартное действие "**Покажи уши**".
 
 Аналагично можно запускать и другие стандартные действия.
+> В `.../kws/wake_phrases` можно публиковать что угодно - фиксируется факт нахождения ключевой фразы
+> В `.../asr/command` нужно публиковать команды, которые описаны в `actions_match` в `robohead_controller/config/robohead_controller.yaml`.
