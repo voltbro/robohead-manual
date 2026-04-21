@@ -23,133 +23,24 @@ description: "Написание своего действия для robohead_c
 
 ## 1. Добавление новой голосовой команды в словарь распознавания речи
 
-Для того чтобы Робоголова могла распознавать команду «улыбнись», нужно обновить формальную грамматику и фонетический словарь движка PocketSphinx.
-
-### 1.1 Обновление файла грамматики (gram.txt)
-
-Формальная грамматика определяет множество команд, которые может распознавать речевой модуль. Откройте файл:
-
-```bash
-nano ~robohead_ws/src/robohead/robohead_controller/config/voice_recognizer_pocketsphinx/gram.txt
-```
-
-В нём вы увидите примерно такой набор правил:
-
-```jsgf
-#JSGF V1.0;
-
-grammar robohead_cmds;
-
-public <commands> = <command> ;
-
-<command> = <command_1> | <command_2> | <command_3> | <command_4>;
-
-<command_1> = покажи ( уши | левое ухо | правое ухо ) ;
-<command_2> = поздоровайся ;
-<command_3> = сделай фото ;
-<command_4> = следи за шариком ;
-```
-
-Чтобы добавить новую команду `<command_5> = улыбнись`, нужно:
-
-1. Расширить список команд, включив `<command_5>` в правило `<command>`.
-2. Добавить определение `<command_5>`.
-
-В результате ваш файл должен выглядеть так:
-
-```jsgf
-#JSGF V1.0;
-
-grammar robohead_cmds;
-
-public <commands> = <command> ;
-
-<command> = 
-    <command_1> 
-  | <command_2> 
-  | <command_3> 
-  | <command_4> 
-  | <command_5> ;
-
-<command_1> = покажи ( уши | левое ухо | правое ухо ) ;
-<command_2> = поздоровайся ;
-<command_3> = сделай фото ;
-<command_4> = следи за шариком ;
-<command_5> = улыбнись ;
-```
-
-> **Примечание:** Формат JSGF чувствителен к синтаксису: убедитесь, что конструкции `|` и `;` стоят на своих местах, и нет лишних пробелов или символов.
-
-### 1.2 Обновление фонетического словаря слов (dictionary.dict)
-
-Для автоматической генерации фонетического словаря будем использовать специальную утилиту, но перед этим нам нужно писать **все** слова, из которых будет составлен фонетический словарь: в нем должны быть перечислены все ключевые слова, и составляющие команд (слова, предлоги, союзы и т.д.)
-
-Откройте файл, где будут перечислены все слова, из которых будет строиться фонетический словарь:
-
-```bash
-nano ~robohead_ws/src/robohead/robohead_controller/config/voice_recognizer_pocketsphinx/dictionary.txt
-```
-
-Добавьте слово `улыбнись` в конец списка (или в алфавитном порядке для удобства):
-
-```
-слушайробот
-покажи
-уши
-ухо
-левое
-правое
-поздоровайся
-сделай
-фото
-следи
-за
-шариком
-улыбнись
-```
-
-Теперь сконвертируем этот текстовый словарь `dictionary.txt` в фонетический словарь `dictionary.dict`. Используем для этого утилиту `dict2transcript.pl`, расположенную в пакете `ru4sphinx`.
-
-Запустите команду:
-
-```bash
-~/robohead_ws/src/ru4sphinx/text2dict/dict2transcript.pl   ~/robohead_ws/src/robohead/robohead_controller/config/voice_recognizer_pocketsphinx/dictionary.txt   ~/robohead_ws/src/robohead/robohead_controller/config/voice_recognizer_pocketsphinx/dictionary.dict
-```
-
-В результате этого скрипта будет создан файл `dictionary.dict`, содержащий фонетические транскрипции слов. Примерный результат:
-
-```
-за z aa
-левое ll je v ay i
-поздоровайся p ay z d a r oo v ay j ss i
-покажи p ay k a zh yy
-правое p r aa v ay i
-сделай z dd je l ay j
-следи s ll i dd ii
-слушайробот s l uu sh ay j r ay b ay t
-улыбнись u l y b nn ii ss
-ухо uu h ay
-уши uu sh y
-фото f oo t ay
-шариком sh aa rr i k ay m
-```
-
-> **Важно:** В некоторых случаях произношение одного слова может зависеть от контекста или ударения. Чтобы улучшить распознавание, можно добавить альтернативные варианты транскрипции, например:
-
-```
-следи s ll i dd ii
-следи(2) s ll je dd ii
-
-левое ll je v ay i
-левое(2) ll je v oo je
-
-улыбнись u l y b nn ii ss
-```
-
-Каждую альтернативную транскрипцию можно поместить в отдельную строку, указав слово с суффиксом `(2)` — это поможет PocketSphinx распознавать команды с разным тембром и ударением в речи.
-
-Базовый набор альтернативных транскрипций можете посмотреть ДО конвертации в файле `dictionary.dict`, после конвертации они будут перезаписаны. 
-
+1. Откройте конфиг-файл ASR-ноды:
+   ```bash
+   nano ~/robohead_ws/src/robohead2/robohead_controller/config/speech_recognizer_asr.yaml
+   ```
+2. Добавьте в `commands` команду **"Улыбнись"**. Получится примерно следующее:
+   ```yaml
+       commands:
+         - 'покажи уши'
+         - 'покажи левое ухо'
+         - 'покажи правое ухо'
+         - 'поздоровайся'
+         - 'сделай фото'
+         - 'повтори за мной'
+         - 'ответь на вопрос'
+         - 'следи за шариком'
+         - 'покажи напряжение'
+         - 'улыбнись'
+   ```
 ---
 
 ## 2. Создание скрипта действия
@@ -165,7 +56,7 @@ nano ~robohead_ws/src/robohead/robohead_controller/config/voice_recognizer_pocke
 Перейдите в директорию, где хранятся скрипты действий:
 
 ```bash
-cd ~/robohead_ws/src/robohead/robohead_controller/scripts/robohead_controller_actions
+cd ~/robohead_ws/src/robohead2/robohead_controller/robohead_controller/actions
 ```
 
 Создайте папку `smile` для нового действия
@@ -182,60 +73,92 @@ mkdir smile
 Откройте файл `action.py` и вставьте следующий код, который реализует действие «улыбки»:
 
 ```python
-from robohead_controller_actions.main import *
+# smile
+# действие, выполняющееся при команде "Улыбнись"
 
-def run(robohead_controller: RoboheadController, cmds: str):
-    # Получаем путь к текущему скрипту (чтобы корректно ссылаться на медиа-файлы)
-    script_path = os.path.dirname(os.path.abspath(__file__)) + '/'
+# Импорты нужны для автоподстановок кода при работе через VSCode
+from __future__ import annotations
+from typing import TYPE_CHECKING
+import os
 
-    # 1) Вывод изображения 'smile.png' на экран робота
-    msg_img = PlayMediaRequest()
-    msg_img.is_blocking = 0        # не блокировать основной поток
-    msg_img.is_cycled = 0          # показывать изображение один раз
-    msg_img.path_to_file = script_path + 'smile.png'
-    robohead_controller.display_driver_srv_PlayMedia(msg_img)
+if TYPE_CHECKING:
+    from robohead_controller.controller import RoboheadController
+    import threading
 
-    # 2) Поворот шеи к источнику звука
-    msg_neck = NeckSetAngleRequest()
-    msg_neck.horizontal_angle = min(max(robohead_controller.respeaker_driver_doa_angle, -30), 30)
-    msg_neck.vertical_angle = 30
-    msg_neck.duration = 1          # время движения в секундах
-    msg_neck.is_blocking = 0       # не ждать окончания движения шеи
-    robohead_controller.neck_driver_srv_NeckSetAngle(msg_neck)
 
-    # 3) Разворот ушей в стороны для эффекта «улыбки»
-    msg_ears = EarsSetAngleRequest()
-    msg_ears.left_ear_angle = -90   # левое ухо влево
-    msg_ears.right_ear_angle = 90   # правое ухо вправо
-    robohead_controller.ears_driver_srv_EarsSetAngle(msg_ears)
+def run(
+    controller: RoboheadController, action_name: str, cancel_event: threading.Event
+):
+    """
+    Args:
+        controller: Ссылка на контроллер
+        action_name: Команда, по которой было вызвано действие
+        cancel_event: threading.Event для проверки отмены
+    """
+    action_dir = os.path.dirname(os.path.abspath(__file__)) # Путь к папке со скриптом, обычно это:
+    # /home/pi/robohead_ws/build/robohead_controller/robohead_controller/actions/std_ears
 
-    # 4) Проигрывание звукового файла 'smile.mp3'
-    msg_audio = PlayAudioRequest()
-    msg_audio.path_to_file = script_path + 'smile.mp3'
-    msg_audio.is_blocking = 1      # дождаться завершения воспроизведения
-    msg_audio.is_cycled = 0        # воспроизвести один раз
-    robohead_controller.speakers_driver_srv_PlayAudio(msg_audio)
+    logger = controller.get_logger()        # logger - объект логирования, через него можно печатать в консоль
+    logger.info(f"[{action_name}] start")   # выводим в терминал "[std_ears] start"
+
+    # Выводим картинку smile.png без зацикливания воспроизведения (это же картинка) и блокирования вызова
+    controller.media_driver.play_display(
+        cancel_event=cancel_event,
+        video_path=os.path.join(action_dir, "smile.png"),
+        loop=False,
+        block=False,
+    )
+
+    # Получаем угол, откуда пришёл голос и ограничиваем его в диапазоне от -30 до +30
+    h_angle = max(-30, min(30, -controller.respeaker_driver.doa))  # type: ignore
+
+    # Поворачиваем голову в сторону, откуда пришёл звук
+    controller.neck_driver.set_angle(
+        cancel_event=cancel_event,
+        horizontal=h_angle, # Поворот в сторону звука
+        vertical=30,    # Голова приподнята вверх
+        duration=1.5,   # Длительность достижения положения 1.5 секунд
+        block=False,    # Неблокирующий вызов
+    )
+
+    controller.ears_driver.set_angle(
+        cancel_event=cancel_event,
+        left=-90,       # Левое ухо назад на 90 градусов
+        right=90,       # Правое ухо вперед на 90 градусов
+        duration=0.5,   # Достижение положения на 0.5 секунды
+        block=False,    # Неблокирующий вызов
+    )
+
+    # Проигрываем звук smile.mp3 без зацикливания воспроизведения и блокирования вызова
+    controller.media_driver.play_audio(
+        cancel_event=cancel_event,
+        audio_path=os.path.join(action_dir, "smile.mp3"),   # Воспроизводим аудио-файл "smile.mp3"
+        loop=False, # Воспроизведение без зацикливания
+        block=True, # Блокирующий вызов
+    ) 
+
+    logger.info(f"[{action_name}] finish")  # выводим в терминал "[std_ears] finish"
 ```
 
 **Что происходит в коде:**
 
-1. **PlayMediaRequest:** отправляет на экран робота изображение `smile.png`, создавая визуальный эффект «улыбки».  
-2. **NeckSetAngleRequest:** поворачивает голову к говорящему, используя угол `respeaker_driver_doa_angle`, возвращаемый микрофоном ReSpeaker. Ограничение угла в диапазоне от −30° до +30° обеспечивает плавность и безопасность движения.  
-3. **EarsSetAngleRequest:** разворачивает уши в стороны, устанавливая углы на −90° (левое ухо) и +90° (правое ухо), что усиливает впечатление «улыбающегося» робота.  
-4. **PlayAudioRequest:** приостанавливает дальнейшие действия до окончания воспроизведения аудиофайла `smile.mp3`, чтобы завершить «улыбку» звуковым сопровождением.
+1. **controller.media_driver.play_display(...):** выводит на экран робота изображение `smile.png`
+2. **controller.neck_driver.set_angle(...):** поворачивает голову к говорящему, используя угол `controller.respeaker_driver.doa`, возвращаемый микрофоном ReSpeaker. Ограничение угла в диапазоне от −30° до +30° обеспечивает плавность и безопасность движения.  
+3. **controller.ears_driver.set_angle(...):** разворачивает уши в стороны, устанавливая углы на −90° (левое ухо) и +90° (правое ухо), что усиливает впечатление «улыбающегося» робота.  
+4. **controller.media_driver.play_audio(...):** приостанавливает дальнейшие действия до окончания воспроизведения аудиофайла `smile.mp3`, чтобы завершить «улыбку» звуковым сопровождением.
 
 ---
 
 ## 3. Настройка конфигурации пакета robohead_controller
 
-Осталось связать голосовую команду с написанным скриптом. Для этого редактируем файл `robohead_controller.yaml`.
+Осталось связать голосовую команду с написанным скриптом. Для этого редактируем файл `robohead_controller/config/robohead_controller.yaml`.
 
 ### 3.1 Открытие конфигурационного файла
 
 Файл находится по пути:
 
 ```
-~robohead_ws/src/robohead/robohead_controller/config/robohead_controller.yaml
+~robohead_ws/src/robohead2/robohead_controller/config/robohead_controller.yaml
 ```
 
 Откройте его в любом удобном редакторе.
@@ -245,25 +168,31 @@ def run(robohead_controller: RoboheadController, cmds: str):
 Найдите секцию, отвечающую за сопоставление распознанных команд с соответствующими скриптами:
 
 ```yaml
-robohead_controller_actions_match: {
-  "wait_action": "robohead_controller_actions.std_wait.action",
-  "low_bat_action": "robohead_controller_actions.std_low_bat.action",
-  "слушайробот": "robohead_controller_actions.std_attention.action",
-  "покажи левое ухо": "robohead_controller_actions.std_left_ear.action",
-  "покажи правое ухо": "robohead_controller_actions.std_right_ear.action",
-  "покажи уши": "robohead_controller_actions.std_ears.action",
-  "сделай фото": "robohead_controller_actions.std_make_photo.action",
-  "поздоровайся": "robohead_controller_actions.std_greeting.action",
-  "следи за шариком": "robohead_controller_actions.std_ball_tracker.action",
+actions_match: >
+{
+  "std_startup" :       "std_startup/action.py",
+  "std_wait":           "std_wait/action.py", 
+  "std_low_bat":        "std_low_bat/action.py",
+  "std_attention":       "std_attention/action.py",
+  "поздоровайся":       "std_greeting/action.py",
+  "покажи уши":         "std_ears/action.py",
+  "следи за шариком" :  "std_ball_tracker/action.py",
+  "сделай фото" :       "std_make_photo/action.py",
+  "покажи левое ухо" :  "std_left_ear/action.py",
+  "покажи правое ухо" : "std_right_ear/action.py",
+  "повтори за мной" :   "std_echo/action.py",
+  "ответь на вопрос" :  "std_llm/action.py",
+  "покажи напряжение" : "std_show_voltage/action.py",
+  "громче" :            "std_volume_up/action.py",
+  "тише" :              "std_volume_down/action.py",
   # Добавляем связку для команды «улыбнись»
-  "улыбнись": "robohead_controller_actions.smile.action",
+  "улыбнись" :          "smile/action.py"
 }
 ```
 
 > **Совет:** Следите за правильными кавычками и отсутствием лишних запятых, чтобы YAML-файл оставался рабочим.
 
 ## 4. Применение изменений
-
 Для применения изменений в конфигурационных файлах (движка распознавания речи и `robohead_controller.yaml`) требуется перезапуск пакета `robohead_controller`. Сделать это можно тремя способами:
 - Остановить Ubuntu-сервис и запустить пакет в ручном режиме для отладки (наиболее предпочтительный вариант, так как можно сразу увидеть появляющиеся ошибки)
 - Перезапустить Ubuntu-сервис (удобен для проверки работы того, как будет работать Робоголова после перезагрузки питания)
@@ -280,11 +209,11 @@ sudo systemctl stop robohead.service
 Запустите `robohead_controller` и все зависимости в ручном режиме:
 
 ```bash
-roslaunch robohead_controller robohead_controller_py.launch
+ros2 launch robohead_controller robohead_controller.launch.py
 ```
 На экране терминала должен появиться примерно следующий вывод:
 
-![Запуск без ошибок](attachments/robohead-launch.png)
+![Запуск без ошибок](attachments/robohead_controller-launch.png)
 
 ### 4.2 Перезапуск Ubuntu-сервиса
 
@@ -313,18 +242,25 @@ sudo systemctl restart robohead.service
 
 Таким образом, вы получите полностью работающее и наглядное голосовое действие, которое легко редактировать и расширять в дальнейшем.
 
+
 ## 6. Отладка команд
 В этом шаге описано как запускать стандартные действия, не произнося каждый раз голосом нужную команду.
 
 Отлаживать команды можно как при автоматически запущенном `robohead_controller` (через Ubuntu-сервис), так и когда он запущен в ручном режиме (этот вариант предпочтительнее для отладки, так как видны все возникающие ошибки)
 
-Откройте новое окно терминала, подключитесь к Робоголове и опубликуйте "**улыбнись**" в топик `/robohead_controller/voice_recognizer_pocketsphinx/cmds_recognizer/commands`
-
+Откройте новое окно терминала, подключитесь к Робоголове.
+Далее нужно опубликовать Робоголове ключевую фразу:
 ```bash
-# Запустите в отдельном терминале
-rostopic pub /robohead_controller/voice_recognizer_pocketsphinx/cmds_recognizer/commands std_msgs/String "data: 'улыбнись'"
+ros2 topic pub /robohead/speech_recognizer/kws/wake_phrases std_msgs/msg/String "data: 'слушай робот'" --once
 ```
 
-После публикации команды Робоголова должна выполнить ваше действие.
+И, пока не прошел таймаут, успеть опубликовать команду, которую нужно запустить:
+```bash
+ros2 topic pub /robohead/speech_recognizer/asr/commands std_msgs/msg/String "data: 'улыбнись'" --once
+```
 
-В топик нужно отправлять именно ту строку символов, которая была указана в `robohead_controller_actions_match` файла `robohead_controller.yaml`
+После публикации команды Робоголова должна выполнить стандартное действие "**Покажи уши**".
+
+Аналагично можно запускать и другие стандартные действия.
+> В `.../kws/wake_phrases` можно публиковать что угодно - фиксируется факт нахождения ключевой фразы
+> В `.../asr/command` нужно публиковать команды, которые описаны в `actions_match` в `robohead_controller/config/robohead_controller.yaml`.

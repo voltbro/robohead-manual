@@ -6,7 +6,7 @@ sidebar_label: "Описание объектов класса RoboheadControlle
 sidebar_position: 3
 description: "Описание объектов класса RoboheadController"
 ---
-
+## <span style={{color: 'red'}}>Может быть удалить это? Всё подробно описано в introduction/software/robohead_controller</span>
 # Описание объектов класса RoboheadController
 
 В разделе опишем класс `RoboheadController` из пакета **robohead_controller**. Именно этот класс используется внутри **action-скриптов** для взаимодействия с различными компонентами Робоголовы. Ниже представлено подробное описание полей и сервисов класса, а также примеры использования.

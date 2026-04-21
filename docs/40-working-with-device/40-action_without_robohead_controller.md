@@ -30,13 +30,155 @@ description: "Создание своих сценариев взаимодей�
 
 ## Шаг 1. Подготовка
 
-1. Создайте в домашней папке (`home/pi`) папку `scripts` перейдите в неё
+1. Создайте в домашней папке (`/home/pi`) папку `scripts` перейдите в неё
+```bash
+cd ~/
+mkdir scripts
+```
 
 2. Скопируйте в папку два медиа-файла:
    - [`smile.png`](attachments/smile.png) — изображение для отображения.
    - [`smile.mp3`](attachments/smile.mp3) — аудиофайл для воспроизведения.
 
 3. В этой же папке создайте файл скрипта `main.py`:
+
+
+```python
+#!/usr/bin/env python3
+"""
+smile_node.py — демонстрация управления медиа и сервоприводами Робоголовы
+ROS2 Jazzy | Python 3.10+
+"""
+
+from robohead_interfaces.srv import PlayMedia, SimpleCommand, Move
+from rclpy.node import Node
+from rclpy.time import Duration
+import rclpy
+import os
+import time
+import sys
+
+
+class SmileNode(Node):
+    def __init__(self):
+        super().__init__("smile_node")
+        
+        # Пути к файлам
+        self.script_path = os.path.dirname(os.path.abspath(__file__))
+        
+        # Клиенты сервисов
+        self.srv_play_media = self.create_client(PlayMedia, "/robohead/media_driver/play_media")
+        self.srv_set_volume = self.create_client(SimpleCommand, "/robohead/media_driver/set_volume")
+        self.srv_neck_set_angle = self.create_client(Move, "/robohead/neck_driver/neck_set_angle")
+        self.srv_ears_set_angle = self.create_client(Move, "/robohead/ears_driver/ears_set_angle")
+        self.srv_ears_is_idle = self.create_client(SimpleCommand, "/robohead/ears_driver/is_idle") 
+
+        # Ожидание доступности всех сервисов
+        services = [
+            ("play_media", self.srv_play_media),
+            ("set_volume", self.srv_set_volume),
+            ("neck_set_angle", self.srv_neck_set_angle),
+            ("ears_set_angle", self.srv_ears_set_angle),
+            ("ears_driver/is_idle", self.srv_ears_is_idle),
+        ]
+        for name, srv in services:
+            if not srv.wait_for_service(timeout_sec=10.0):
+                self.get_logger().error(f"Service '{name}' not available")
+                sys.exit(1)
+        self.get_logger().info("All services available")
+
+    def call_service_sync(self, client, request, timeout_sec=5.0):
+        """Вспомогательный метод для синхронного вызова сервиса"""
+        future = client.call_async(request)
+        start = self.get_clock().now()
+        while rclpy.ok() and not future.done():
+            if (self.get_clock().now() - start) > Duration(seconds=timeout_sec):
+                self.get_logger().error("Service call timeout")
+                return None
+            rclpy.spin_once(self, timeout_sec=0.1)
+        return future.result()
+
+    def run(self):
+        # 1. Установка громкости
+        self.get_logger().info("Setting volume...")
+        req_vol = SimpleCommand.Request()
+        req_vol.data = 60
+        self.call_service_sync(self.srv_set_volume, req_vol)
+
+        # 2. Воспроизведение медиа
+        self.get_logger().info("Playing media...")
+        req_media = PlayMedia.Request()
+        req_media.path_to_video_file = os.path.join(self.script_path, 'smile.png')
+        req_media.path_to_audio_file = os.path.join(self.script_path, 'smile.mp3')
+        req_media.loop = False
+        self.call_service_sync(self.srv_play_media, req_media)
+
+        # 3. Поворот головы (шейный сустав)
+        self.get_logger().info("Moving neck...")
+        req_neck = Move.Request()
+        req_neck.angle_a = 30    # наклон вперёд/вверх
+        req_neck.angle_b = -30   # поворот в сторону
+        req_neck.duration = 1.0
+        self.call_service_sync(self.srv_neck_set_angle, req_neck)
+
+        # 4. Качание ушами в течение 3 секунд (2 Гц = туда-обратно за 0.5 с)
+        self.get_logger().info("Wiggling ears for 3 seconds...")
+        direction = 1
+        start_time = self.get_clock().now()
+        cycle_duration = 0.5  # 2 Гц: полный цикл туда-обратно
+        
+        while (self.get_clock().now() - start_time) < Duration(seconds=3.0):
+            req_ears = Move.Request()
+            req_ears.angle_a = 90 * direction
+            req_ears.angle_b = -90 * direction
+            req_ears.duration = 0.5  # половина цикла
+            self.call_service_sync(self.srv_ears_set_angle, req_ears)
+
+            while self.call_service_sync(self.srv_ears_is_idle, SimpleCommand.Request()).data != True:
+                time.sleep(0.01)  # 100 Гц
+                # Обрабатываем колбэки ROS2
+                rclpy.spin_once(self, timeout_sec=0.01)
+
+            # Переключаем направление и ждём половину периода
+            direction *= -1
+
+        
+        self.get_logger().info("Sequence completed!")
+
+        # Возвращаемся в стартовую позицию
+        req_media = PlayMedia.Request()
+        req_media.path_to_video_file = "__STOP__"
+        req_media.path_to_audio_file = "__STOP__"
+        req_media.loop = False
+        self.call_service_sync(self.srv_play_media, req_media)
+
+        req = Move.Request()
+        req.angle_a = 0
+        req.angle_b = 0
+        req.duration = 1.0
+        self.call_service_sync(self.srv_neck_set_angle, req)
+        self.call_service_sync(self.srv_ears_set_angle, req)
+
+
+def main():
+    rclpy.init()
+    node = SmileNode()
+    try:
+        node.run()
+    except KeyboardInterrupt:
+        node.get_logger().info("Interrupted by user")
+    finally:
+        node.destroy_node()
+        if rclpy.ok():
+            rclpy.shutdown()
+
+
+if __name__ == "__main__":
+    main()
+```
+
+## <span style={{color: 'red'}}>Всё что ниже обновить (Шаг 2 и Шаг 3) в соответсвии с кодом выше</span>
+
 
 ---
 
@@ -222,9 +364,9 @@ print('Сценарий "Улыбнись" завершён. Все механи
 2. **Запуск зависимостей (драйверов).**  
    
    ```bash
-   roslaunch robohead_controller dependencies.launch
+   ros2 launch robohead_controller dependencies.launch.py
    ```
-   Эта команда запустит все необходимые драйверы (*display_driver*, *ears_driver*, *neck_driver*, *speakers_driver*).
+   Эта команда запустит все необходимые драйверы (*display_driver*, *ears_driver*, *neck_driver*, *speakers_driver*, ...).
 
 3. **Запуск нашего скрипта.**  
    В том же терминале, где расположен файл `main.py`, выполните:
