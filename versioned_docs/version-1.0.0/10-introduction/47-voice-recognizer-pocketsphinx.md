@@ -46,7 +46,7 @@ voice_recognizer_pocketsphinx/
 
 ---
 
-## Основные возможности {#ros-node-voice-pocketspinx}
+## Основные возможности
 
 Пакет `voice_recognizer_pocketsphinx` обеспечивает два режима распознавания на основе движка Pocketsphinx:
 

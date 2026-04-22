@@ -4,10 +4,8 @@ slug: robohead_controller
 title: Пакет robohead_controller
 sidebar_label: "robohead_controller"
 description: "robohead_controller"
-draft: true
+draft: false
 ---
-
-<!-- # Пакет `robohead_controller` -->
 
 ## Общее описание
 

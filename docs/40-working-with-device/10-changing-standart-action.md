@@ -19,7 +19,6 @@ description: "Изменение действий в стандартных ко
 Любые изменения в **коде (`action.py`)** стандартных действий применяются "на лету", после сохранения изменений файлов. Если началось непредсказуемое поведение - перезапустите сервис `robohead.service` или запустите пакет `robohead_controller` в ручном режиме (см. далее).
 :::
 
-
 ## 1. Расположение файлов стандартных действий
 
 Стандартные действия находятся в папке `~/robohead_ws/src/robohead2/robohead_controller/robohead_controller/actions` пакета [`robohead_controller`](../10-introduction/40-software/41-robohead-controller.md). Для `std_ears` перейдите в папку:
