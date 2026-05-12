@@ -143,12 +143,12 @@ robohead_controller
 * `neck_driver.yaml` — настройка параметров шейных сервоприводов
 * `respeaker_driver.yaml` — настройка параметров микрофонного массива
 * `sensor_driver.yaml` — настройка параметров датчика АКБ
-* `silro_tts.yaml` - настройка параметров tts (Text to Speech) пакета Silero
-* `speech_recognizer_asr.yaml` - настройка параметров пакета speech_recognizer для свободного распознавания и распознавания по грамматике
-* `speech_recognizer_kws.yaml` - настройка параметров пакета speech_recognizer для ключевых слов (wake_phrases) и быстрых команд (fast_commands)
-* `robohead_controller.yaml` - главный конфигурационный файл пакета robohead_controller
+* `silero_tts.yaml` — настройка параметров TTS (Text to Speech) пакета Silero
+* `speech_recognizer_asr.yaml` — настройка параметров пакета `speech_recognizer` для свободного распознавания и распознавания по грамматике
+* `speech_recognizer_kws.yaml` — настройка параметров пакета `speech_recognizer` для ключевых слов (`wake_phrases`) и быстрых команд (`fast_commands`)
+* `robohead_controller.yaml` — главный конфигурационный файл пакета `robohead_controller`
 
-Настройка соответствия "голосовая команда - action-скрипт" задается в файле `config/robohead_controller.yaml`.
+Настройка соответствия «голосовая команда — action-скрипт» задаётся в файле `config/robohead_controller.yaml`.
 
 ## TODO проверить ссылку
 Подробнее про настройку параметров написано здесь [->](../../30-device-configuration/30-device-setting/30-changing-device-settings.md)
@@ -342,7 +342,7 @@ def run(controller, action_name: str, cancel_event: threading.Event):
 | `std_right_ear` | `actions/std_right_ear/action.py` | Демонстрация правого уха |
 | `std_show_voltage` | `actions/std_show_voltage/action.py` | Показывает текущие напряжение и ток на АКБ |
 | `std_echo` | `actions/std_echo/action.py` | Записывает вашу речь и повторяет своим голосом |
-| `std_llm` | `actions/std_llm/action.py` | Распознает ваш вопрос и отправляет большой языковой модели, полученный от неё ответ озвучивается
+| `std_llm` | `actions/std_llm/action.py` | Распознаёт ваш вопрос и отправляет его большой языковой модели, затем озвучивает полученный ответ
 
 ### Быстрые действия (Fast Actions)
 

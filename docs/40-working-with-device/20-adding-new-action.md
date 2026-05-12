@@ -51,7 +51,7 @@ description: "Написание своего действия для robohead_c
 
 [Аудио-файл, воспроизводимый через динамики. smile.mp3](attachments/smile.mp3)
 
-### 2.1 Структура папки скрипта и медиа-файлов
+### 2.1 Структура папки скрипта и медиафайлов
 
 Перейдите в директорию, где хранятся скрипты действий:
 
@@ -64,7 +64,7 @@ cd ~/robohead_ws/src/robohead2/robohead_controller/robohead_controller/actions
 mkdir smile
 ```
 
-В папке `smile` создайте файл `action.py`. Переместите в эту же папку два медиа-файла: изображение улыбки (`smile.png`) и звуковой файл с «улыбкой» (`smile.mp3`). Если вы используете удалённое подключение (SFTP или VSCode Remote), просто перетащите эти файлы в папку `smile`.
+В папке `smile` создайте файл `action.py`. Переместите в эту же папку два медиафайла: изображение улыбки (`smile.png`) и звуковой файл с «улыбкой» (`smile.mp3`). Если вы используете удалённое подключение (SFTP или VSCode Remote), просто перетащите эти файлы в папку `smile`.
 
 ![Состав папки `smile`](attachments/smile-action.png)
 
@@ -132,7 +132,7 @@ def run(
     # Проигрываем звук smile.mp3 без зацикливания воспроизведения и блокирования вызова
     controller.media_driver.play_audio(
         cancel_event=cancel_event,
-        audio_path=os.path.join(action_dir, "smile.mp3"),   # Воспроизводим аудио-файл "smile.mp3"
+        audio_path=os.path.join(action_dir, "smile.mp3"),   # Воспроизводим аудиофайл "smile.mp3"
         loop=False, # Воспроизведение без зацикливания
         block=True, # Блокирующий вызов
     ) 
@@ -261,6 +261,6 @@ ros2 topic pub /robohead/speech_recognizer/asr/commands std_msgs/msg/String "dat
 
 После публикации команды Робоголова должна выполнить стандартное действие "**Покажи уши**".
 
-Аналагично можно запускать и другие стандартные действия.
-> В `.../kws/wake_phrases` можно публиковать что угодно - фиксируется факт нахождения ключевой фразы
+Аналогично можно запускать и другие стандартные действия.
+> В `.../kws/wake_phrases` можно публиковать что угодно — фиксируется факт нахождения ключевой фразы
 > В `.../asr/command` нужно публиковать команды, которые описаны в `actions_match` в `robohead_controller/config/robohead_controller.yaml`.

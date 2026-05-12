@@ -4,7 +4,7 @@ slug: package-contents
 title: "Комплектация"
 sidebar_label: "Комплектация"
 sidebar_position: 2
-description: "Комплектация поставки образовательного ровере BRover-E5"
+description: "Комплектация поставки Робоголовы Bbrain"
 ---
 
 Робоголова Bbrain 2.0 поставляется в готовом к работе виде. В базовую комплектацию входит:

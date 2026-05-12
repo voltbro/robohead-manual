@@ -45,7 +45,7 @@ def run(robohead_controller: RoboheadController, cmds: str):
 ### Экран и тачскрин (display_driver)
 
 - **`display_driver_srv_PlayMedia`** (`rospy.ServiceProxy`):  
-  Сервис для отображения медиа-файла (изображение или короткое видео) на экране. Ожидает сообщение типа `PlayMediaRequest`, в котором указываются:
+  Сервис для отображения медиафайла (изображения или короткого видео) на экране. Ожидает сообщение типа `PlayMediaRequest`, в котором указываются:
   - `path_to_file` — путь к изображению/видео.
   - `is_blocking` — ждать ли окончания показа (1 — да, 0 — нет).
   - `is_cycled` — зацикливать ли показ (0 — один раз, 1 — циклично).
@@ -67,7 +67,7 @@ def run(robohead_controller: RoboheadController, cmds: str):
 > from robohead_controller_actions.main import *
 > 
 > def run(robohead_controller: RoboheadController, cmds: str):
->     # Получаем путь к текущему скрипту (чтобы корректно ссылаться на медиа-файлы)
+>     # Получаем путь к текущему скрипту (чтобы корректно ссылаться на медиафайлы)
 >     script_path = os.path.dirname(os.path.abspath(__file__)) + '/'
 > 
 >     # Показ изображения
@@ -82,7 +82,7 @@ def run(robohead_controller: RoboheadController, cmds: str):
 >     x, y = robohead_controller.display_driver_touchscreen_xy
 >     print(f"Касание: X={x:.1f}, Y={y:.1f}")
 > ```
-> **Важно:** вывод функции `print()` вы увидете в терминале только, если запустите `robohead_controller` в ручном режиме.
+> **Важно:** вывод функции `print()` вы увидите в терминале, только если запустите `robohead_controller` в ручном режиме.
 
 Стандартные действия, в которых можно посмотреть примеры применения:
 * [`std_attention`](https://github.com/voltbro/robohead/blob/main/robohead_controller/scripts/robohead_controller_actions/std_attention/action.py)
@@ -160,13 +160,13 @@ def run(robohead_controller: RoboheadController, cmds: str):
   Сервис для установки уровня громкости. Использует `SetVolumeRequest`:
   - `volume` (`int`): новое значение (0 ... 100).
 
-> **Пример**: Установка громкости и воспроизведение аудио-файла:
+> **Пример:** установка громкости и воспроизведение аудиофайла:
 > ```python
 > from robohead_controller_actions.main import *
 > 
 > def run(robohead_controller: RoboheadController, cmds: str):
 >     
->     # Получаем путь к текущему скрипту (чтобы корректно ссылаться на медиа-файлы)
+>     # Получаем путь к текущему скрипту (чтобы корректно ссылаться на медиафайлы)
 >     script_path = os.path.dirname(os.path.abspath(__file__)) + '/'
 > 
 >     # Установка громкости 50%
@@ -174,7 +174,7 @@ def run(robohead_controller: RoboheadController, cmds: str):
 >     vol_msg.volume = 50
 >     robohead_controller.speakers_driver_srv_SetVolume(vol_msg)
 > 
->     # Воспроизведения аудио-файла
+>     # Воспроизведение аудиофайла
 >     msg = PlayAudioRequest()
 >     msg.path_to_file = script_path + 'image.png'
 >     msg.is_blocking = 1
@@ -289,7 +289,7 @@ def run(robohead_controller: RoboheadController, cmds: str):
 
 5. **`respeaker_driver_srv_SetColorPaletteLED`**  
    - **Тип:** `rospy.ServiceProxy`  
-   - **Описание:** Сервис для установки цветов палитры для стандартных анимаций светодиодного кольца (например, следящий за направленим звука светодиод)
+   - **Описание:** Сервис для установки цветов палитры для стандартных анимаций светодиодного кольца (например, светодиода, следящего за направлением звука)
 > **Пример** 
 > ```python
 > from robohead_controller_actions.main import *

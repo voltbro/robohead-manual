@@ -236,7 +236,7 @@ aplay /dev/shm/tmp_silero_tts.wav
 
 ```bash
 # Скачать модель (однократно)
-cd ~/robohead_ws/srс/robohead2/silero_tts/silero_tts/model/
+cd ~/robohead_ws/src/robohead2/silero_tts/silero_tts/model/
 ./download_model.sh
 
 # Сборка
